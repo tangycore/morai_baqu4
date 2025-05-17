@@ -1,0 +1,3 @@
+[submodule "src/MORAI-ROS2_morai_msgs"]
+	path = src/MORAI-ROS2_morai_msgs
+	url = git@github.com:MORAI-Autonomous/MORAI-ROS2_morai_msgs.git
