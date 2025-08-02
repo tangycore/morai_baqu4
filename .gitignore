@@ -1,0 +1,15 @@
+# ROS2 워크스페이스 빌드 산출물
+build/
+install/
+log/
+
+# Python 캐시
+*.pyc
+__pycache__/
+
+# VSCode, IDE 설정
+.vscode/
+*.swp
+
+# 기타
+.DS_Store
