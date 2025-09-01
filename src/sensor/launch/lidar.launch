@@ -1,0 +1,33 @@
+<launch>
+  <!-- JSON에 맞춘 포트 기본값: 전방=2369, 후방=2368 -->
+  <arg name="front_port" default="2369"/>  <!-- 전방(HDL32E) -->
+  <arg name="rear_port"  default="2368"/>  <!-- 후방(VLP16)  -->
+
+  <!-- 전방 라이다 (yaw=0, pos: x=1.880, y=0.0, z=1.280) -->
+  <group ns="front_hdl32e">
+    <node pkg="velodyne_driver" type="velodyne_node" name="driver">
+      <param name="port"     value="$(arg front_port)"/>
+      <param name="frame_id" value="front_lidar"/>
+    </node>
+    <node pkg="velodyne_pointcloud" type="cloud_node" name="cloud">
+      <param name="frame_id" value="front_lidar"/>
+    </node>
+  </group>
+
+  <!-- 후방 라이다 (yaw=180°, pos: x=1.200, y=0.0, z=1.300) -->
+  <group ns="rear_vlp16">
+    <node pkg="velodyne_driver" type="velodyne_node" name="driver">
+      <param name="port"     value="$(arg rear_port)"/>
+      <param name="frame_id" value="rear_lidar"/>
+    </node>
+    <node pkg="velodyne_pointcloud" type="cloud_node" name="cloud">
+      <param name="frame_id" value="rear_lidar"/>
+    </node>
+  </group>
+
+  <!-- 정적 TF (args = x y z yaw pitch roll parent child) -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_front"
+        args="1.880 0.0 1.280  0 0 0  base_link front_lidar"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_rear"
+        args="1.200 0.0 1.300  3.14159 0 0  base_link rear_lidar"/>
+</launch>

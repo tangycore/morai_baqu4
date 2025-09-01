@@ -1,8 +1,0 @@
-export MAMBA_EXE=$HOME/.local/bin/micromamba
-export MAMBA_ROOT_PREFIX=/opt/mamba
-export ROSDEP_SOURCE_PATH=$MAMBA_ROOT_PREFIX/envs/morai/etc/rosdep
-
-eval "$(micromamba shell hook --shell $(basename $SHELL))"
-
-micromamba activate morai
-source $MAMBA_ROOT_PREFIX/envs/morai/setup.sh

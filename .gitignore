@@ -1,15 +1,20 @@
-# ROS2 워크스페이스 빌드 산출물
+# === ROS1 Catkin Workspace ===
+
+# 빌드 산출물
 build/
-install/
+devel/
+logs/
 log/
 
 # Python 캐시
 *.pyc
 __pycache__/
 
-# VSCode, IDE 설정
+# IDE / Editor 설정
 .vscode/
+.idea/
 *.swp
 
-# 기타
+# OS 파일
 .DS_Store
+.ipynb_checkpoints/
