@@ -1,13 +1,16 @@
-#!/usr/bin/env sh
-colcon build \
-  --merge-install \
-  --event-handlers console_cohesion+ \
-  --cmake-args \
-    -DCMAKE_BUILD_TYPE=Release \
-    -GNinja \
-    -DQT_HOST_PATH="/opt/mamba/envs/morai" \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
-    -DBUILD_TESTS=OFF \
-    -DBUILD_TESTS_PCL=OFF \
-    -DCMAKE_CXX_STANDARD=17 \
-    $@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${BUILD_TYPE:=Release}"
+: "${JOBS:=$(nproc)}"
+
+if [ $# -gt 0 ]; then
+  export CATKIN_WHITELIST_PACKAGES="$1"
+else
+  unset CATKIN_WHITELIST_PACKAGES 2>/dev/null || true
+fi
+
+catkin_make -j${JOBS} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_TESTING=OFF
+
+echo "[build] done"
+
