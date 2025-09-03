@@ -1,7 +1,6 @@
 <launch>
   <arg name="model" default="HDL-32E"/>  
   <arg name="front_port" default="2368"/>
-  <arg name="rear_port"  default="2369"/>
 
   <!-- 전방 라이다 (pos: 1.530, 0.0, 1.450 / yaw=0) -->
   <group ns="front_lidar">
@@ -15,21 +14,8 @@
     </node>
   </group>
 
-  <!-- 후방 라이다 (pos: -0.100, 0.0, 1.350 / yaw=180) -->
-  <group ns="rear_lidar">
-    <node pkg="velodyne_driver" type="velodyne_node" name="driver" output="screen">
-      <param name="port"     value="$(arg rear_port)"/>
-      <param name="frame_id" value="rear_lidar"/>
-    </node>
-    <node pkg="velodyne_pointcloud" type="cloud_node" name="cloud" output="screen">
-      <param name="frame_id" value="rear_lidar"/>
-      <param name="model"    value="$(arg model)"/>
-    </node>
-  </group>
 
   <!-- 정적 TF (args = x y z yaw pitch roll parent child) -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="tf_front"
         args="1.530 0.0 1.450  0 0 0  base_link front_lidar"/>
-  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_rear"
-        args="-0.100 0.0 1.350  0 3.14159 0  base_link rear_lidar"/>
 </launch>

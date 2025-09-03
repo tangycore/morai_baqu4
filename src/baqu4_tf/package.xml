@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>baqu4_tf</name>
+  <version>0.0.1</version>
+  <description>Baqu4 sensor bringup (launch only)</description>
+  <maintainer email="you@example.com">baqu4</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- launch에서 사용하는 패키지들 -->
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>velodyne_driver</exec_depend>
+  <exec_depend>velodyne_pointcloud</exec_depend>
+  <!-- 필요하면 roscpp/rospy 추가 -->
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+
+  <export/>
+</package>
