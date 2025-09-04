@@ -1,23 +1,37 @@
 <launch>
-  <arg name="model" default="HDL-32E"/>
-  <arg name="front_port" default="2368"/>
+  <arg name="model"        default="HDL-32E"/>
+  <arg name="front_port"   default="2368"/>
+  <arg name="calib_file"   default="$(find velodyne_pointcloud)/params/32db.yaml"/>
+  <!-- 필요 시 송신 IP 제한용. 비우면 전체 허용 -->
+  <arg name="device_ip"    default=""/>
+  <arg name="target_frame" default="base_link"/>
 
   <group ns="front_lidar">
-    <node pkg="velodyne_driver" type="velodyne_node" name="driver" output="screen">
-      <param name="port" value="$(arg front_port)"/>
-      <param name="frame_id" value="front_lidar"/>
-      <param name="calibration" value="$(find velodyne_pointcloud)/params/32db.yaml"/>
-  </node>
+    <!-- 1) 같은 프로세스를 제공할 매니저 -->
+    <node pkg="nodelet" type="nodelet" name="velodyne_mgr" args="manager" output="screen"/>
 
-    <!--nodelet 사용 -->
-    <node pkg="nodelet" type="nodelet" name="cloud" output="screen"
-          args="standalone velodyne_pointcloud/TransformNodelet">
+    <!-- 2) 드라이버 노들릿 -->
+    <node pkg="nodelet" type="nodelet" name="driver"
+          args="load velodyne_driver/DriverNodelet velodyne_mgr" output="screen">
       <param name="frame_id" value="front_lidar"/>
-      <param name="model"    value="$(arg model)"/>
-      <param name="calibration" value="$(find velodyne_pointcloud)/params/32db.yaml"/>
-  </node>
+      <param name="port"     value="$(arg front_port)"/>
+      <param name="device_ip" value="$(arg device_ip)"/>
+    </node>
+
+    <!-- 3) 포인트클라우드 변환 노들릿 -->
+    <node pkg="nodelet" type="nodelet" name="cloud"
+          args="load velodyne_pointcloud/TransformNodelet velodyne_mgr" output="screen">
+      <param name="frame_id"     value="front_lidar"/>
+      <param name="model"        value="$(arg model)"/>
+      <param name="calibration"  value="$(arg calib_file)"/>
+      <param name="target_frame" value="$(arg target_frame)"/>
+      <!-- 선택: 필요하면 범위 필터 -->
+      <!-- <param name="min_range" value="0.9"/>
+      <param name="max_range" value="130.0"/> -->
+    </node>
   </group>
 
+  <!-- 정적 TF -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="tf_front"
         args="1.530 0.0 1.450  0 0 0  base_link front_lidar"/>
 </launch>
