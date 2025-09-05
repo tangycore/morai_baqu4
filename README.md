@@ -11,6 +11,7 @@
 roslaunch baqu4_tf lidar.launch
 
 2. 토픽 확인
+```bash
 rostopic hz /front_lidar/velodyne_points
 rostopic echo -n1 /imu
 
