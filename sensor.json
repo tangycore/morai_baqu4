@@ -18,7 +18,7 @@
         "sensorName": "DefaultSensor",
         "sensorType": 1,
         "sensorPeriod": 0.033333335071802139,
-        "commType": 3,
+        "commType": 1,
         "udpConfig": {
           "hostIP": "127.0.0.1",
           "hostPort": 9090,
@@ -214,7 +214,7 @@
         "sensorName": "DefaultSensor",
         "sensorType": 4,
         "sensorPeriod": 0.20000000298023224,
-        "commType": 3,
+        "commType": 1,
         "udpConfig": {
           "hostIP": "127.0.0.1",
           "hostPort": 9090,
@@ -283,7 +283,7 @@
         "sensorName": "DefaultSensor",
         "sensorType": 5,
         "sensorPeriod": 0.019999999552965164,
-        "commType": 1,
+        "commType": 3,
         "udpConfig": {
           "hostIP": "127.0.0.1",
           "hostPort": 9090,
