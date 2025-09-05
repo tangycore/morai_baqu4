@@ -14,4 +14,3 @@ roslaunch baqu4_tf lidar.launch
 rostopic hz /front_lidar/velodyne_points
 rostopic echo -n1 /imu
 
-::contentReference[oaicite:0]{index=0}
