@@ -1,0 +1,31 @@
+<launch>
+  <!-- Camera TF Configuration -->
+  <!-- 실제 센서 위치 및 회전 파라미터 -->
+  <arg name="camera_x"     default="1.530"/>  <!-- 전방 1.530m -->
+  <arg name="camera_y"     default="0.000"/>  <!-- 중앙 -->
+  <arg name="camera_z"     default="1.400"/>  <!-- 높이 1.400m -->
+  
+  <!-- 회전 파라미터 (라디안) -->
+  <!-- sensor.json에는 pitch=355°(-5°)로 기록되어 있으나,
+       실제 투영 테스트 결과 0°가 정확함 -->
+  <arg name="camera_roll"  default="0.0"/>
+  <arg name="camera_pitch" default="0.0"/>  <!-- 문서: -5°, 실제: 0° -->
+  <arg name="camera_yaw"   default="0.0"/>
+  
+  <!-- 프레임 이름 -->
+  <arg name="camera_frame" default="front_camera"/>
+  <arg name="base_frame"   default="base_link"/>
+  
+  <!-- Static Transform Publisher -->
+  <!-- base_link → front_camera 변환 발행 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" 
+        name="tf_front_camera"
+        args="$(arg camera_x) $(arg camera_y) $(arg camera_z) 
+              $(arg camera_roll) $(arg camera_pitch) $(arg camera_yaw)
+              $(arg base_frame) $(arg camera_frame)"/>
+  
+  <!-- 카메라 정보 출력 (디버깅용) -->
+  <node pkg="rostopic" type="rostopic" name="camera_info_echo"
+        args="echo -n 1 /image_jpeg/compressed"
+        output="screen"/>
+</launch>
