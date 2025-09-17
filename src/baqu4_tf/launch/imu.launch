@@ -1,0 +1,15 @@
+<launch>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="imu_frame"  default="IMU-1"/>
+
+  <arg name="x" default="1.530"/>
+  <arg name="y" default="0.000"/>
+  <arg name="z" default="1.260"/>
+
+  <arg name="yaw"   default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="roll"  default="0.0"/>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_imu"
+        args="$(arg x) $(arg y) $(arg z)  $(arg yaw) $(arg pitch) $(arg roll)  $(arg base_frame) $(arg imu_frame)"/>
+</launch>

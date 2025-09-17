@@ -1,0 +1,79 @@
+<launch>
+  <!-- 공통 -->
+  <arg name="base_frame" default="base_link"/>
+
+  <!-- LIDAR 설정 -->
+  <arg name="model"        default="HDL-32E"/>
+  <arg name="front_port"   default="2368"/>
+  <arg name="calib_file"   default="$(find velodyne_pointcloud)/params/32db.yaml"/>
+  <arg name="device_ip"    default=""/>
+  <arg name="lidar_frame"  default="front_lidar"/>
+  <arg name="lidar_x"      default="1.530"/>
+  <arg name="lidar_y"      default="0.000"/>
+  <arg name="lidar_z"      default="1.450"/>
+
+  <!-- Camera 설정 -->
+  <arg name="camera_frame" default="front_camera"/>   <!-- /image_jpeg/compressed header.frame_id와 일치 필요 -->
+  <arg name="cam_x"        default="1.530"/>
+  <arg name="cam_y"        default="0.000"/>
+  <arg name="cam_z"        default="1.400"/>
+  <!-- static_transform_publisher는 yaw pitch roll 순서 -->
+  <arg name="cam_yaw"      default="0.0"/>
+  <arg name="cam_pitch"    default="0.0"/>            <!-- 문서값: -0.0872665(rad) -->
+  <arg name="cam_roll"     default="0.0"/>
+
+  <!-- IMU 설정 -->
+  <arg name="imu_frame"    default="IMU-1"/>
+  <arg name="imu_x"        default="1.530"/>
+  <arg name="imu_y"        default="0.000"/>
+  <arg name="imu_z"        default="1.260"/>
+  <arg name="imu_yaw"      default="0.0"/>
+  <arg name="imu_pitch"    default="0.0"/>
+  <arg name="imu_roll"     default="0.0"/>
+
+  <!-- GPS 설정 -->
+  <arg name="gps_frame"    default="GPS-3"/>
+  <arg name="gps_x"        default="1.530"/>
+  <arg name="gps_y"        default="0.000"/>
+  <arg name="gps_z"        default="1.270"/>
+  <arg name="gps_yaw"      default="0.0"/>
+  <arg name="gps_pitch"    default="0.0"/>
+  <arg name="gps_roll"     default="0.0"/>
+
+  <!-- ========== LiDAR 드라이버/포인트클라우드 ========== -->
+  <group ns="front_lidar">
+    <node pkg="nodelet" type="nodelet" name="velodyne_mgr" args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet" name="driver"
+          args="load velodyne_driver/DriverNodelet velodyne_mgr" output="screen">
+      <param name="frame_id"  value="$(arg lidar_frame)"/>
+      <param name="port"      value="$(arg front_port)"/>
+      <param name="device_ip" value="$(arg device_ip)"/>
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="cloud"
+          args="load velodyne_pointcloud/TransformNodelet velodyne_mgr" output="screen">
+      <param name="frame_id"     value="$(arg lidar_frame)"/>
+      <param name="model"        value="$(arg model)"/>
+      <param name="calibration"  value="$(arg calib_file)"/>
+      <param name="target_frame" value="$(arg base_frame)"/>
+    </node>
+  </group>
+
+  <!-- ========== 정적 TF: base_link -> 각 센서 ========== -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_front_lidar"
+        args="$(arg lidar_x) $(arg lidar_y) $(arg lidar_z)  0 0 0  $(arg base_frame) $(arg lidar_frame)"/>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_camera_link"
+        args="$(arg cam_x) $(arg cam_y) $(arg cam_z)  $(arg cam_yaw) $(arg cam_pitch) $(arg cam_roll)  $(arg base_frame) $(arg camera_frame)"/>
+
+  <!-- 필요 시 optical 프레임 추가 (camera_link -> camera_optical) -->
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="tf_camera_optical"
+        args="0 0 0  -1.5707963 0 -1.5707963  $(arg camera_frame) $(arg camera_frame)_optical"/> -->
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_imu"
+        args="$(arg imu_x) $(arg imu_y) $(arg imu_z)  $(arg imu_yaw) $(arg imu_pitch) $(arg imu_roll)  $(arg base_frame) $(arg imu_frame)"/>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_gps"
+        args="$(arg gps_x) $(arg gps_y) $(arg gps_z)  $(arg gps_yaw) $(arg gps_pitch) $(arg gps_roll)  $(arg base_frame) $(arg gps_frame)"/>
+</launch>

@@ -1,0 +1,16 @@
+<launch>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="gps_frame"  default="GPS-3"/>
+
+  <arg name="x" default="1.530"/>
+  <arg name="y" default="0.000"/>
+  <arg name="z" default="1.270"/>
+
+  <!-- yaw, pitch, roll 순서로 관리 -->
+  <arg name="yaw"   default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="roll"  default="0.0"/>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tf_gps"
+        args="$(arg x) $(arg y) $(arg z)  $(arg yaw) $(arg pitch) $(arg roll)  $(arg base_frame) $(arg gps_frame)"/>
+</launch>
