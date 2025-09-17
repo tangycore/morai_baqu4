@@ -3,16 +3,14 @@
 
 
 1. MORAI 센서 설정  
-   - LiDAR: UDP로 Connect  
-   - IMU: ROS로 Connect
-
-2. LiDAR 실행
+   - LiDAR: UDP
+   - IMU, CAM, GPS: ROS
 ```bash
-roslaunch baqu4_tf lidar.launch
+roslaunch rosbridge_server rosbridge_websocket.launch
 ```
 
-3. 토픽 확인
+2. TF 발행
 ```bash
-rostopic hz /front_lidar/velodyne_points
-rostopic echo -n1 /imu
+roslaunch baqu4_tf baqu4_tf.launch
 ```
+
