@@ -14,7 +14,10 @@ __pycache__/
 .vscode/
 .idea/
 *.swp
+compile_commands.json
 
 # OS 파일
 .DS_Store
 .ipynb_checkpoints/
+
+
