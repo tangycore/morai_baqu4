@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>baqu4_udp</name>
+  <version>0.0.1</version>
+  <description>UDP bridge nodes for MORAI → ROS (CollisionData, Ego/CompetitionVehicleStatus).</description>
+
+  <maintainer email="sukyun02@hanyang.ac.kr">Sukyun Lee</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Core runtime deps -->
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+</package>
