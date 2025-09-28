@@ -1,24 +1,20 @@
 <launch>
-  <!-- 공통 파라미터 -->
-  <arg name="ip"                    default="127.0.0.1"/>
-  <arg name="collision_port"        default="9092"/>    <!-- CollisionData 수신 포트 -->
-  <arg name="competition_port"      default="909"/>     <!-- Competition Vehicle Status 포트 -->
-  <arg name="rate_hz"              default="20"/>      <!-- 원래 스크립트에서 20Hz -->
+  <arg name="ip"               default="127.0.0.1"/>
+  <arg name="collision_port"   default="9122"/>
+  <arg name="competition_port" default="9121"/>
+  <arg name="rate_hz"          default="20"/>
 
-  <!-- baqu4_udp 파이썬 패키지를 import 하기 위해 PYTHONPATH에 상위 경로를 추가 -->
-  <env name="PYTHONPATH" value="$(env PYTHONPATH):$(find baqu4_udp)/.."/>
+  <env name="PYTHONPATH" value="$(find baqu4_udp)/vendor/morai_udp:$(optenv PYTHONPATH)"/>
 
-  <!-- 충돌 데이터 수신 노드 -->
   <node pkg="baqu4_udp" type="CollisionDataNode.py" name="collision_data_node" output="screen">
-    <param name="ip"       value="$(arg ip)"/>
-    <param name="port"     value="$(arg collision_port)"/>
-    <param name="rate_hz"  value="$(arg rate_hz)"/>
+    <param name="ip" value="$(arg ip)"/>
+    <param name="port" value="$(arg collision_port)"/>
+    <param name="rate_hz" value="$(arg rate_hz)"/>
   </node>
 
-  <!-- 경기차량 상태 수신 노드 -->
   <node pkg="baqu4_udp" type="CompetitionVehicleStatusNode.py" name="competition_vehicle_status_node" output="screen">
-    <param name="ip"       value="$(arg ip)"/>
-    <param name="port"     value="$(arg competition_port)"/>
-    <param name="rate_hz"  value="$(arg rate_hz)"/>
+    <param name="ip" value="$(arg ip)"/>
+    <param name="port" value="$(arg competition_port)"/>
+    <param name="rate_hz" value="$(arg rate_hz)"/>
   </node>
 </launch>
