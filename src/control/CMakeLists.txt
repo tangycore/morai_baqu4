@@ -11,11 +11,5 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-catkin_install_python(PROGRAMS
-  scripts/global_path_pub.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-# launch 설치(선택이지만 권장)
 install(DIRECTORY launch
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

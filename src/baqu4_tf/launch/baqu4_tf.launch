@@ -2,6 +2,10 @@
   <!-- 공통 -->
   <arg name="base_frame" default="base_link"/>
 
+  <!-- 전역/로컬 프레임 이름 -->
+  <arg name="map_frame"  default="map"/>
+  <arg name="odom_frame" default="odom"/>
+
   <!-- LIDAR 설정 -->
   <arg name="model"        default="HDL-32E"/>
   <arg name="front_port"   default="2368"/>
@@ -76,4 +80,9 @@
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="tf_gps"
         args="$(arg gps_x) $(arg gps_y) $(arg gps_z)  $(arg gps_yaw) $(arg gps_pitch) $(arg gps_roll)  $(arg base_frame) $(arg gps_frame)"/>
+  <!-- ========== 정적 TF: map -> odom (동일 원점/축) ==========  
+       - yaw pitch roll 순서(라디안)
+       - 지금은 (0,0,0, 0,0,0)로 'map'과 'odom'을 겹치게 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom"
+      args="0 0 0 0 0 0 map odom"/>      
 </launch>

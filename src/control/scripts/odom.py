@@ -26,8 +26,8 @@ class GPSIMUParser:
         self.proj_UTM = Proj(proj='utm',zone=52, ellps='WGS84', preserve_units=False)
 
         self.odom_msg=Odometry()
-        self.odom_msg.header.frame_id='/odom'
-        self.odom_msg.child_frame_id='/base_link'
+        self.odom_msg.header.frame_id='odom'
+        self.odom_msg.child_frame_id='base_link'
 
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
