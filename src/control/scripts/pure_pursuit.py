@@ -17,9 +17,9 @@ class pure_pursuit :
         rospy.init_node('pure_pursuit', anonymous=True)
         rospy.Subscriber("/local_path", Path, self.path_callback)
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
-        self.ctrl_cmd_pub = rospy.Publisher('/Ctrl_cmd',CtrlCmd, queue_size=1)
+        self.ctrl_cmd_pub = rospy.Publisher('/ctrl_cmd',CtrlCmd, queue_size=1)
         self.ctrl_cmd_msg=CtrlCmd()
-        self.ctrl_cmd_msg.longlCmdType=2
+        self.ctrl_cmd_msg.longlCmdType=1
 
         self.is_path=False
         self.is_odom=False
@@ -66,18 +66,23 @@ class pure_pursuit :
 
                 if self.is_look_forward_point :
                     self.ctrl_cmd_msg.steering = atan2((2*self.vehicle_length*sin(theta)),self.lfd)
+                    self.ctrl_cmd_msg.accel = 0.20
+                    self.ctrl_cmd_msg.brake = 0.0
                     self.ctrl_cmd_msg.velocity = 15.0
 
                     os.system('clear')
                     print("-------------------------------------")
                     print(" steering (deg) = ", self.ctrl_cmd_msg.steering * 180/3.14)
-                    print(" velocity (kph) = ", self.ctrl_cmd_msg.velocity)
+                    print(" accel (kph) = ", self.ctrl_cmd_msg.accel)
+                    print(" brake          = ", self.ctrl_cmd_msg.brake)
                     print("-------------------------------------")
                 else : 
                     print("no found forward point")
                     self.ctrl_cmd_msg.steering=0.0
+                    self.ctrl_cmd_msg.accel=0.0
+                    self.ctrl_cmd_msg.brake=0.0
                     self.ctrl_cmd_msg.velocity=0.0
-                
+                    
                 self.ctrl_cmd_pub.publish(self.ctrl_cmd_msg)
 
             else:
