@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="planning_pkg" type="global_path.py" name="global_path" output="screen">
+  </node>
+
+  <node pkg="planning_pkg" type="local_path.py" name="local_path" output="screen">
+  </node>
+</launch>
