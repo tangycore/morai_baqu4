@@ -36,12 +36,12 @@ class VehicleState:
 
 
     def update_from_msg(self, msg):
-        self.x = msg.position.x
-        self.y = msg.position.y
-        self.z = msg.position.z
+        # self.x = msg.position.x
+        # self.y = msg.position.y
+        # self.z = msg.position.z
 
-        # deg → rad 변환
-        self.heading = math.radians(msg.heading)
+        # # deg → rad 변환
+        # self.heading = math.radians(msg.heading)
 
         # velocity
         self.vx = msg.velocity.x
@@ -72,7 +72,7 @@ class LocalPath:
         self.frenet_path_msg = Path()
         self.frenet_path_msg.header.frame_id = '/map'
 
-        # rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        rospy.Subscriber("/odom", Odometry, self.odom_callback)
         rospy.Subscriber("/global_path", Path, self.global_path_callback)
         rospy.Subscriber("/Ego_topic", EgoVehicleStatus, self.status_callback)
 
@@ -89,11 +89,11 @@ class LocalPath:
         self.is_status = True
         self.ego_state.update_from_msg(msg)
 
-    # def odom_callback(self, msg):
-    #    odom_quaternion=(msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,msg.pose.pose.orientation.z,msg.pose.pose.orientation.w)
-    #    _, _, self.vehicle_yaw = euler_from_quaternion(odom_quaternion)
-    #    self.ego_state.x = msg.pose.pose.position.x
-    #    self.ego_state.y = msg.pose.pose.position.y
+    def odom_callback(self, msg):
+       odom_quaternion=(msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,msg.pose.pose.orientation.z,msg.pose.pose.orientation.w)
+       _, _, self.ego_state.heading = euler_from_quaternion(odom_quaternion)
+       self.ego_state.x = msg.pose.pose.position.x
+       self.ego_state.y = msg.pose.pose.position.y
 
     def global_path_callback(self, msg):
         if self.global_path == None:
