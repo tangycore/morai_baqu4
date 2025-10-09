@@ -1,0 +1,23 @@
+# === ROS1 Catkin Workspace ===
+
+# 빌드 산출물
+build/
+devel/
+logs/
+log/
+
+# Python 캐시
+*.pyc
+__pycache__/
+
+# IDE / Editor 설정
+.vscode/
+.idea/
+*.swp
+compile_commands.json
+
+# OS 파일
+.DS_Store
+.ipynb_checkpoints/
+
+

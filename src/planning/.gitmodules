@@ -1,0 +1,28 @@
+[submodule "src/MORAI-ROS_morai_msgs"]
+	path = src/MORAI-ROS_morai_msgs
+	url = git@github.com:MORAI-Autonomous/MORAI-ROS_morai_msgs.git
+	branch = master
+[submodule "src/morai_common"]
+	path = src/morai_common
+	url = git@github.com:BBAAMM/morai_common.git
+[submodule "src/morai_bringup"]
+	path = src/morai_bringup
+	url = git@github.com:BBAAMM/morai_bringup.git
+[submodule "src/slam/gtsam"]
+	path = src/slam/gtsam
+	url = git@github.com:borglab/gtsam.git
+[submodule "src/slam/eigen"]
+	path = src/slam/eigen
+	url = git@github.com:baqu4-2025-driverless/eigen.git
+[submodule "src/slam/gtsam_points"]
+	path = src/slam/gtsam_points
+	url = git@github.com:BBAAMM/gtsam_points.git
+	branch = v1.1.1
+[submodule "src/slam/glim_ros1"]
+	path = src/slam/glim_ros1
+	url = git@github.com:BBAAMM/glim_ros1
+	branch = v1.1.1
+[submodule "src/slam/glim"]
+	path = src/slam/glim
+	url = git@github.com:BBAAMM/glim
+	branch = v1.1.1

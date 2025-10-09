@@ -1,0 +1,264 @@
+import rospy
+import sys
+from geometry_msgs.msg import Point32, PoseStamped
+from nav_msgs.msg import Odometry, Path
+from morai_msgs.msg import EgoVehicleStatus
+import tf
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+import numpy as np
+
+from planning_pkg.frenet import world2frenet, frenet2world
+from planning_pkg.planner import generate_opt_path, \
+                                generate_velocity_keeping_trajectories_in_frenet, \
+                                frenet_paths_to_world, check_valid_path
+from planning_pkg.config import DESIRED_LAT_POS, FINAL_DESIRED_SPEED
+
+import math
+
+class VehicleState:
+    def __init__(self):
+        self.x = 0.0
+        self.y = 0.0
+        self.z = 0.0
+
+        self.heading = 0.0  # rad 단위로 변환 저장
+
+        self.vx = 0.0
+        self.vy = 0.0
+        self.vz = 0.0
+        self.v = 0.0   # speed magnitude
+
+ 
+        self.ax = 0.0
+        self.ay = 0.0
+        self.az = 0.0
+        self.a = 0.0   # magnitude
+
+
+    def update_from_msg(self, msg):
+        self.x = msg.position.x
+        self.y = msg.position.y
+        self.z = msg.position.z
+
+        # deg → rad 변환
+        self.heading = math.radians(msg.heading)
+
+        # velocity
+        self.vx = msg.velocity.x
+        self.vy = msg.velocity.y
+        self.vz = msg.velocity.z
+        self.v = math.sqrt(self.vx**2 + self.vy**2 + self.vz**2)
+
+        # acceleration
+        self.ax = msg.acceleration.x
+        self.ay = msg.acceleration.y
+        self.az = msg.acceleration.z
+        self.a = math.sqrt(self.ax**2 + self.ay**2 + self.az**2)
+
+    def __str__(self):
+        return f"(x={self.x:.3f}, y={self.y:.3f}, heading={math.degrees(self.heading):.2f}°, v={self.v:.3f} m/s, a={self.a:.3f} m/s²)"
+
+class LocalPath:
+    def __init__(self):
+        rospy.init_node('local_path', anonymous=True)
+        self.opt_local_path_pub = rospy.Publisher('/opt_path', Path, queue_size=1)
+        self.valid_local_path_pub = rospy.Publisher('/valid_local_path', Path, queue_size=1)
+        self.frenet_path_pub = rospy.Publisher('/all_frenet_path', Path, queue_size=1)
+
+        self.opt_local_path_msg = Path()
+        self.opt_local_path_msg.header.frame_id = '/map'
+        self.valid_local_path_msg = Path()
+        self.valid_local_path_msg.header.frame_id = '/map'
+        self.frenet_path_msg = Path()
+        self.frenet_path_msg.header.frame_id = '/map'
+
+        # rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        rospy.Subscriber("/global_path", Path, self.global_path_callback)
+        rospy.Subscriber("/Ego_topic", EgoVehicleStatus, self.status_callback)
+
+        self.ego_state = VehicleState()
+        self.global_path = None
+        self.refer_xlist = []
+        self.refer_ylist = []
+        self.refer_slist = []
+        self.s0, self.s1, self.s2 = 0, 0, 0
+        self.d0, self.d1, self.d2 = 0, 0, 0
+        self.setup_reference_line() # init start state
+
+    def status_callback(self, msg):
+        self.is_status = True
+        self.ego_state.update_from_msg(msg)
+
+    # def odom_callback(self, msg):
+    #    odom_quaternion=(msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,msg.pose.pose.orientation.z,msg.pose.pose.orientation.w)
+    #    _, _, self.vehicle_yaw = euler_from_quaternion(odom_quaternion)
+    #    self.ego_state.x = msg.pose.pose.position.x
+    #    self.ego_state.y = msg.pose.pose.position.y
+
+    def global_path_callback(self, msg):
+        if self.global_path == None:
+            self.global_path = msg
+
+    def setup_reference_line(self):
+        while not self.global_path:
+            rospy.logdebug_once("Waiting global path")
+        rospy.loginfo("find global path")
+        total = len(self.global_path.poses)
+        for i, pose in enumerate(self.global_path.poses):
+            self.refer_xlist.append(pose.pose.position.x)
+            self.refer_ylist.append(pose.pose.position.y)
+
+            progress = (i + 1) / total
+            bar = '=' * int(progress * 40)
+            sys.stdout.write(f"\rProgress: [{bar:<40}] {progress*100:6.2f}%")
+            sys.stdout.flush()
+
+        sys.stdout.write("\n")
+        rospy.loginfo("Reference line setup complete")
+
+        rospy.loginfo(f"refer frenet_s setting start.")
+        self.refer_slist = [
+                world2frenet(rx, ry, self.refer_xlist, self.refer_ylist)[0] \
+                    for (rx, ry) in list(zip(self.refer_xlist, self.refer_ylist))
+            ]
+        rospy.loginfo(f"refer frenet_s setting done.")
+        self.s0, self.d0 = world2frenet(self.ego_state.x, self.ego_state.y, 
+                    self.refer_xlist, self.refer_ylist)
+        rospy.loginfo("All setup done!")
+    
+    def frenet_path_to_msg(self, path):
+        path_msg = Path()
+        path_msg.header.frame_id = "map"
+        path_msg.header.stamp = rospy.Time.now()
+
+        for x, y, yaw in zip(path.xlist, path.ylist, path.yawlist):
+            pose = PoseStamped()
+            pose.header.frame_id = "map"
+            pose.header.stamp = rospy.Time.now()
+            pose.pose.position.x = x
+            pose.pose.position.y = y
+            pose.pose.position.z = 0.0
+
+            # yaw → quaternion 변환
+            q = tf.transformations.quaternion_from_euler(0, 0, yaw)
+            pose.pose.orientation.x = q[0]
+            pose.pose.orientation.y = q[1]
+            pose.pose.orientation.z = q[2]
+            pose.pose.orientation.w = q[3]
+
+            path_msg.poses.append(pose)
+
+        return path_msg
+    
+    def update_frenet_state(self):
+        if self.global_path is None or len(self.refer_xlist) < 2:
+            rospy.logwarn("[LocalPath] Reference line not ready.")
+            return
+
+        self.s0, self.d0 = world2frenet(
+            self.ego_state.x,
+            self.ego_state.y,
+            self.refer_xlist,
+            self.refer_ylist
+        )
+
+        idx = np.argmin(np.hypot(
+            np.array(self.refer_xlist) - self.ego_state.x,
+            np.array(self.refer_ylist) - self.ego_state.y
+        ))
+
+        if idx < len(self.refer_xlist) - 1:
+            dx = self.refer_xlist[idx + 1] - self.refer_xlist[idx]
+            dy = self.refer_ylist[idx + 1] - self.refer_ylist[idx]
+        else:
+            dx = self.refer_xlist[idx] - self.refer_xlist[idx - 1]
+            dy = self.refer_ylist[idx] - self.refer_ylist[idx - 1]
+
+        theta_r = math.atan2(dy, dx)
+
+        if 1 <= idx < len(self.refer_xlist) - 1:
+            x1, y1 = self.refer_xlist[idx - 1], self.refer_ylist[idx - 1]
+            x2, y2 = self.refer_xlist[idx], self.refer_ylist[idx]
+            x3, y3 = self.refer_xlist[idx + 1], self.refer_ylist[idx + 1]
+
+            a = math.hypot(x2 - x1, y2 - y1)
+            b = math.hypot(x3 - x2, y3 - y2)
+            c = math.hypot(x3 - x1, y3 - y1)
+            s = (a + b + c) / 2.0
+            area = math.sqrt(max(s * (s - a) * (s - b) * (s - c), 0))
+            kappa_r = 4 * area / (a * b * c + 1e-9)
+        else:
+            kappa_r = 0.0
+
+        theta_x = self.ego_state.heading
+        vx = self.ego_state.vx
+        vy = self.ego_state.vy
+        ax = self.ego_state.ax
+        ay = self.ego_state.ay
+
+        delta_theta = theta_x - theta_r
+
+        self.s1 = vx * math.cos(delta_theta) + vy * math.sin(delta_theta)
+        self.d1 = -vx * math.sin(delta_theta) + vy * math.cos(delta_theta)
+        self.s2 = ax * math.cos(delta_theta) + ay * math.sin(delta_theta) + self.s1 * self.d1 * kappa_r
+        self.d2 = -ax * math.sin(delta_theta) + ay * math.cos(delta_theta) - self.s1**2 * kappa_r
+
+        rospy.loginfo(f"[LocalPath] Frenet updated: s0={self.s0:.2f}, s1={self.s1:.2f}, s2={self.s2:.2f}, d0={self.d0:.2f}, d1={self.d1:.2f}, d2={self.d2:.2f}")
+
+
+    def generate_local_path(self):
+        if self.ego_state is None or self.global_path is None:
+            rospy.logerr("Check ego_state and global_path.")
+            return
+        rospy.loginfo(f"ego status: {self.ego_state.x}, {self.ego_state.y} | frenet: {self.s0}, {self.d0}")
+        fplist = generate_velocity_keeping_trajectories_in_frenet((self.d0, self.d1, self.d2, 0, 0), 
+                                                                  (self.s0, self.s1, self.s2, 0), 
+                                                                  DESIRED_LAT_POS, 
+                                                                  FINAL_DESIRED_SPEED)
+        fplist = frenet_paths_to_world(fplist, self.refer_xlist, self.refer_ylist, self.refer_slist)
+
+        # frenet path 시각화 용
+        frenet_paths = Path()
+        frenet_paths.header.frame_id = "map"
+        frenet_paths.header.stamp = rospy.Time.now()
+        for path in fplist:
+            frenet_path = self.frenet_path_to_msg(path)
+            frenet_paths.poses.extend(frenet_path.poses)
+        self.frenet_path_msg = frenet_paths
+
+        fplist = check_valid_path(fplist, None) # None <= obs 들어가야함.
+
+        if not fplist:
+            rospy.logwarn("No valid path.")
+            return
+        
+        # valid path 시각화 용
+        valid_paths = Path()
+        valid_paths.header.frame_id = "map"
+        valid_paths.header.stamp = rospy.Time.now()
+        for path in fplist:
+            valid_path = self.frenet_path_to_msg(path)
+            valid_paths.poses.extend(valid_path.poses)
+        self.valid_local_path_msg = valid_paths
+
+        opt_path = generate_opt_path(fplist)
+        self.opt_local_path_msg = self.frenet_path_to_msg(opt_path)
+        
+        
+    def publish_path(self):
+        rate = rospy.Rate(200)  # 200Hz
+        while not rospy.is_shutdown():
+            self.opt_local_path_msg.header.stamp = rospy.Time.now()
+            self.generate_local_path()
+            self.update_frenet_state()
+            self.frenet_path_pub.publish(self.frenet_path_msg)
+            self.valid_local_path_pub.publish(self.valid_local_path_msg)
+            self.opt_local_path_pub.publish(self.opt_local_path_msg)
+            rate.sleep()
+
+if __name__ == "__main__":
+    try:
+        node = LocalPath()
+        node.publish_path()
+    except rospy.ROSInterruptException:
+        pass
