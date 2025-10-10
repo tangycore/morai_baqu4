@@ -52,12 +52,12 @@ K_LON = 1.0
 
 
 DESIRED_LAT_POS = 0
-FINAL_DESIRED_SPEED = 20
+FINAL_DESIRED_SPEED = 10
 DESIRED_SPEED = 5
 DESIRED_DISTACE = 6
-V_MAX = 20
+V_MAX = 10
 ACC_MAX = 5
-K_MAX = 0.3
+K_MAX = 4
 
 # Car config
 # The unit is in meters.

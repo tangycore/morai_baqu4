@@ -1,0 +1,3 @@
+float32 current_speed
+float32 target_speed
+float32 timestamp
