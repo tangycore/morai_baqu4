@@ -112,7 +112,7 @@ def generate_velocity_keeping_trajectories_in_frenet(lat_state, lon_state, opt_d
         desired_speed_list = sorted(set(np.arange(5, desired_speed + 5, 5)) | {desired_speed})
     curr_desired_speed_idx = min(bisect.bisect_left(desired_speed_list, lon_state[1]), len(desired_speed_list) - 1)
     curr_desired_speed = desired_speed_list[curr_desired_speed_idx]
-    dt_0_candidates = [-1, -0.5, 0, 0.5, 1]
+    dt_0_candidates = [0]
     st_1_candidates = np.arange(curr_desired_speed + ST_1_MIN, curr_desired_speed + ST_1_MAX + ST_1_STEP, ST_1_STEP)
     for tt in np.arange(v_keep_tt_min, v_keep_tt_max + TT_STEP, TT_STEP):
         lat_traj_list = generate_lateral_movement(*lat_state, tt, v_keep_tt_max, dt_0_candidates)

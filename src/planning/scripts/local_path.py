@@ -256,18 +256,19 @@ class LocalPath:
         self.valid_local_path_msg = valid_paths
 
         opt_path = generate_opt_path(fplist)
-        self.plan_velocity_info_msg.current_speed = self.s1
-        target_v_idx = np.argmin(np.abs(opt_path.s0 - self.s0 - 1))
+        self.plan_velocity_info_msg.current_speed = self.s1 
+        target_v_idx = np.argmin(np.abs(opt_path.s0[1:] - (self.s0 + 1)))
+        rospy.loginfo(f"target v idx: {target_v_idx}")
         self.plan_velocity_info_msg.target_speed = opt_path.s1[target_v_idx]
         self.opt_local_path_msg = self.frenet_path_to_msg(opt_path)
         
         
     def publish_path(self):
-        rate = rospy.Rate(200)  # 200Hz
+        rate = rospy.Rate(5)  # 5Hz
         while not rospy.is_shutdown():
             self.opt_local_path_msg.header.stamp = rospy.Time.now()
-            self.generate_local_path()
             self.update_frenet_state()
+            self.generate_local_path()
             self.frenet_path_pub.publish(self.frenet_path_msg)
             self.valid_local_path_pub.publish(self.valid_local_path_msg)
             self.opt_local_path_pub.publish(self.opt_local_path_msg)
