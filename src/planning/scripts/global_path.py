@@ -28,7 +28,7 @@ class GlobalPath:
             self.global_path_msg.poses.append(read_pose)        
 
     def publish_path(self):
-        rate = rospy.Rate(100) # 100hz
+        rate = rospy.Rate(5) # 100hz
         while not rospy.is_shutdown():
             self.global_path_pub.publish(self.global_path_msg)
             rospy.loginfo_once("publish global path!")
