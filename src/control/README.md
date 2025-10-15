@@ -33,7 +33,7 @@
 - `/odom`, `/opt_path` 토픽이 켜져 있어야함.
 - `python3 ego_control_pub.py` 실행
 
-## Future Work
+## Todo
 - 현재 코너 주행시 속도가 너무 빠름
   1. steer angle에 따라 accel 혹은 break 조절
   2. 아니면 planning 할때 곡률에서 대한 속도 제한 추가 (현재는 그냥 일정한 속도 제한을 하고 있음)

@@ -36,7 +36,7 @@
 1. `roslaunch control control.launch` # odom topic 발행 먼저해야됨.
 2. `roslaunch planning_pkg planning.launch`
 
-## Future Work
+## Todo
 - 모드 변경 기능 추가 (현재 속도 유지 기능만 되어 있음)
   - 정지 모드, 속도 유지 모드
   - Finate state machine으로 하면 될 거 같은 느낌 (신호등, 종료지점)
