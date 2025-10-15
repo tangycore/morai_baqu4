@@ -34,4 +34,4 @@ push after git sync
 ### Planning
  - [바로가기](./src/planning)
 ### Control
-- [바로가기](./src/cotnrol)
+- [바로가기](./src/control)
