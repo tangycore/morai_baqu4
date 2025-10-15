@@ -7,11 +7,16 @@ import tf
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import numpy as np
 
-from planning_pkg.frenet import world2frenet, frenet2world
+from planning_pkg.frenet import world2frenet, frenet2world, find_closest_waypoint
 from planning_pkg.planner import generate_opt_path, \
                                 generate_velocity_keeping_trajectories_in_frenet, \
                                 frenet_paths_to_world, check_valid_path
-from planning_pkg.config import DESIRED_LAT_POS, FINAL_DESIRED_SPEED
+from planning_pkg.config import (
+    DESIRED_LAT_POS,
+    FINAL_DESIRED_SPEED,
+    LOCAL_REF_WINDOW_M,
+    LOCAL_REF_BACKWARD_M,
+)
 from planning_pkg.msg import PlanVelocityInfo
 
 import math
@@ -85,6 +90,19 @@ class LocalPath:
         self.refer_xlist = []
         self.refer_ylist = []
         self.refer_slist = []
+        self.path_resolution = 0.5
+        self.ref_window_m = LOCAL_REF_WINDOW_M
+        self.ref_backward_m = LOCAL_REF_BACKWARD_M
+        self.ref_window_points = 0
+        self.ref_backward_points = 0
+        self.segment_start_idx = 0
+        self.segment_end_idx = 0
+        self.closest_wp_idx = 0
+        self.segment_xlist = np.array([])
+        self.segment_ylist = np.array([])
+        self.segment_slist = np.array([])
+        self.segment_refresh_margin_points = 10
+        self.prev_opt_target_speed = 0.0
         self.s0, self.s1, self.s2 = 0, 0, 0
         self.d0, self.d1, self.d2 = 0, 0, 0
         self.setup_reference_line() # init start state
@@ -120,12 +138,24 @@ class LocalPath:
         sys.stdout.write("\n")
         rospy.loginfo("Reference line setup complete")
 
+        self.refer_xlist = np.array(self.refer_xlist, dtype=float)
+        self.refer_ylist = np.array(self.refer_ylist, dtype=float)
+
+        diffs = np.hypot(np.diff(self.refer_xlist), np.diff(self.refer_ylist))
+        if diffs.size > 0:
+            sample_count = min(200, diffs.size)
+            self.path_resolution = float(np.mean(diffs[:sample_count]))
+        # 전역 경로를 일정 길이 세그먼트로 나누기 위한 포인트 수 계산
+        self.ref_window_points = int(np.ceil(self.ref_window_m / max(self.path_resolution, 1e-3)))
+        self.ref_backward_points = int(np.ceil(self.ref_backward_m / max(self.path_resolution, 1e-3)))
+        self.segment_refresh_margin_points = max(10, int(0.1 * (self.ref_window_points + self.ref_backward_points)))
+
         rospy.loginfo(f"refer frenet_s setting start.")
 
         self.refer_slist = []
         total = len(self.refer_xlist)
         for i, (rx, ry) in enumerate(zip(self.refer_xlist, self.refer_ylist)):
-            s, _ = world2frenet(rx, ry, self.refer_xlist, self.refer_ylist)
+            s, _ = world2frenet(rx, ry, self.refer_xlist, self.refer_ylist, 0.0)
             self.refer_slist.append(s)
 
             progress = (i + 1) / total
@@ -136,10 +166,34 @@ class LocalPath:
 
         sys.stdout.write("\n✅ Frenet conversion complete!\n")
 
+        self.refer_slist = np.array(self.refer_slist, dtype=float)
+
         rospy.loginfo(f"refer frenet_s setting done.")
-        self.s0, self.d0 = world2frenet(self.ego_state.x, self.ego_state.y, 
-                    self.refer_xlist, self.refer_ylist)
+        self.update_reference_segment(0)
+        self.closest_wp_idx = 0
+        self.s0, self.d0 = world2frenet(
+                    self.ego_state.x, self.ego_state.y, 
+                    self.segment_xlist, self.segment_ylist,
+                    self.segment_slist[0] if self.segment_slist.size else 0.0)
         rospy.loginfo("All setup done!")
+
+    def update_reference_segment(self, center_idx):
+        if self.refer_xlist.size == 0:
+            return
+        # 최근 최근접 wp를 중심으로 전·후방 세그먼트를 갱신
+        total_points = self.ref_window_points + self.ref_backward_points
+        start_idx = max(center_idx - self.ref_backward_points, 0)
+        end_idx = start_idx + total_points
+
+        if end_idx >= len(self.refer_xlist):
+            end_idx = len(self.refer_xlist) - 1
+            start_idx = max(end_idx - total_points, 0)
+
+        self.segment_start_idx = start_idx
+        self.segment_end_idx = end_idx
+        self.segment_xlist = self.refer_xlist[start_idx:end_idx + 1]
+        self.segment_ylist = self.refer_ylist[start_idx:end_idx + 1]
+        self.segment_slist = self.refer_slist[start_idx:end_idx + 1]
     
     def frenet_path_to_msg(self, path):
         path_msg = Path()
@@ -165,21 +219,43 @@ class LocalPath:
         return path_msg
     
     def update_frenet_state(self):
-        if self.global_path is None or len(self.refer_xlist) < 2:
-            rospy.logwarn("[LocalPath] Reference line not ready.")
+        if self.global_path is None or self.segment_xlist.size < 2:
+            rospy.logwarn("[LocalPath] Reference segment not ready.")
             return
 
+        local_idx = find_closest_waypoint(
+            self.ego_state.x,
+            self.ego_state.y,
+            self.segment_xlist,
+            self.segment_ylist
+        )
+
+        global_idx = self.segment_start_idx + local_idx
+        self.closest_wp_idx = global_idx
+
+        if (self.segment_end_idx - global_idx) < self.segment_refresh_margin_points:
+            # 세그먼트 끝으로 가까워지면 다음 구간을 미리 준비
+            self.update_reference_segment(global_idx)
+            local_idx = find_closest_waypoint(
+                self.ego_state.x,
+                self.ego_state.y,
+                self.segment_xlist,
+                self.segment_ylist
+            )
+            global_idx = self.segment_start_idx + local_idx
+            self.closest_wp_idx = global_idx
+
+        # 세그먼트의 시작 s 값을 기준점으로 넘겨 연속적인 frenet s 유지
+        initial_s = self.segment_slist[0] if self.segment_slist.size else 0.0
         self.s0, self.d0 = world2frenet(
             self.ego_state.x,
             self.ego_state.y,
-            self.refer_xlist,
-            self.refer_ylist
+            self.segment_xlist,
+            self.segment_ylist,
+            initial_s
         )
 
-        idx = np.argmin(np.hypot(
-            np.array(self.refer_xlist) - self.ego_state.x,
-            np.array(self.refer_ylist) - self.ego_state.y
-        ))
+        idx = global_idx
 
         if idx < len(self.refer_xlist) - 1:
             dx = self.refer_xlist[idx + 1] - self.refer_xlist[idx]
@@ -224,12 +300,15 @@ class LocalPath:
         if self.ego_state is None or self.global_path is None:
             rospy.logerr("Check ego_state and global_path.")
             return
+        if self.segment_xlist.size < 2:
+            rospy.logwarn("[LocalPath] Reference segment not ready for world conversion.")
+            return
         rospy.loginfo(f"ego status: {self.ego_state.x}, {self.ego_state.y} | frenet: {self.s0}, {self.d0}")
         fplist = generate_velocity_keeping_trajectories_in_frenet((self.d0, self.d1, self.d2, 0, 0), 
                                                                   (self.s0, self.s1, self.s2, 0), 
                                                                   DESIRED_LAT_POS, 
                                                                   FINAL_DESIRED_SPEED)
-        fplist = frenet_paths_to_world(fplist, self.refer_xlist, self.refer_ylist, self.refer_slist)
+        fplist = frenet_paths_to_world(fplist, self.segment_xlist, self.segment_ylist, self.segment_slist)
 
         # frenet path 시각화 용
         frenet_paths = Path()
@@ -244,6 +323,9 @@ class LocalPath:
 
         if not fplist:
             rospy.logwarn("No valid path.")
+            self.plan_velocity_info_msg.current_speed = self.ego_state.v 
+            self.plan_velocity_info_msg.target_speed = self.prev_opt_target_speed
+            self.plan_velocity_info_msg.timestamp = rospy.Time.now().to_sec()
             return
         
         # valid path 시각화 용
@@ -254,13 +336,17 @@ class LocalPath:
             valid_path = self.frenet_path_to_msg(path)
             valid_paths.poses.extend(valid_path.poses)
         self.valid_local_path_msg = valid_paths
-
+        
         opt_path = generate_opt_path(fplist)
-        self.plan_velocity_info_msg.current_speed = self.s1 
-        target_v_idx = np.argmin(np.abs(opt_path.s0[1:] - (self.s0 + 1)))
-        rospy.loginfo(f"target v idx: {target_v_idx}")
-        self.plan_velocity_info_msg.target_speed = opt_path.s1[target_v_idx]
+        target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 1)))
+        while target_v_idx < len(opt_path.s1) - 1 and opt_path.s1[target_v_idx] < self.ego_state.v:
+            target_v_idx += 1
+        # PID 입력은 실제 속도와 동일한 단위(m/s)로 전달
+        self.plan_velocity_info_msg.current_speed = self.ego_state.v
+        self.plan_velocity_info_msg.target_speed = opt_path.s1[-1]
+        self.plan_velocity_info_msg.timestamp = rospy.Time.now().to_sec()
         self.opt_local_path_msg = self.frenet_path_to_msg(opt_path)
+        self.prev_opt_target_speed = opt_path.s1[target_v_idx]
         
         
     def publish_path(self):

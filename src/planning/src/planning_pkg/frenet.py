@@ -28,10 +28,9 @@ def get_next_waypoint(curr_x, curr_y, center_line_xlist, center_line_ylist):
 
     return closest_wp
 
-def world2frenet(curr_x, curr_y, center_line_xlist, center_line_ylist):
+def world2frenet(curr_x, curr_y, center_line_xlist, center_line_ylist, initial_s=0.0):
     next_wp = get_next_waypoint(curr_x, curr_y, center_line_xlist, center_line_ylist)
-    prev_wp = next_wp - 1
-
+    prev_wp = max(next_wp - 1, 0)
 
     ego_vec = np.array([
         curr_x - center_line_xlist[prev_wp], 
@@ -51,7 +50,7 @@ def world2frenet(curr_x, curr_y, center_line_xlist, center_line_ylist):
 
     frenet_d = frenet_d_sign * np.hypot(ego_proj_vec[0] - ego_vec[0], ego_proj_vec[1] - ego_vec[1])
 
-    frenet_s = 0
+    frenet_s = initial_s  # 세그먼트 단위 변환용 초기 s 오프셋
     for i in range(prev_wp):
         frenet_s += np.hypot(
             center_line_xlist[i + 1] - center_line_xlist[i],

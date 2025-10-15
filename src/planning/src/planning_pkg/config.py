@@ -44,8 +44,8 @@ SHOW_VALID_PATH = True
 
 # cost config
 K_J   = 0.1
-K_T   = 0.1
-K_D   = 50.0
+K_T   = 100
+K_D   = 150.0
 K_S   = 1.0
 K_LAT = 1.0
 K_LON = 1.0
@@ -55,9 +55,10 @@ DESIRED_LAT_POS = 0
 FINAL_DESIRED_SPEED = 10
 DESIRED_SPEED = 5
 DESIRED_DISTACE = 6
-V_MAX = 12
-ACC_MAX = 5
-K_MAX = 4
+V_MAX = 10
+ACC_MAX = 7
+K_MAX = 5
+MAX_LAT_ACC = 2.5
 
 # Car config
 # The unit is in meters.
@@ -74,3 +75,7 @@ MAX_STEER = np.deg2rad(40)  # rad
 SPEED = 1.0
 
 BUBBLE_R = (WHEEL_BASE) / 2
+
+# Local reference line segmentation (meters)
+LOCAL_REF_WINDOW_M = 320.0
+LOCAL_REF_BACKWARD_M = 30.0

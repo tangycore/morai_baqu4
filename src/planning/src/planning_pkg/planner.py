@@ -248,9 +248,13 @@ def generate_following_trajectories_in_frenet(lat_state, lon_state, lv, opt_d):
 
 def frenet_paths_to_world(frenet_paths, center_line_xlist, center_line_ylist, center_line_slist):
     for fp in frenet_paths:
+        if len(center_line_xlist) == 0 or len(center_line_slist) == 0:
+            continue
         center_headings = []
         for s, d in zip(fp.s0, fp.d0):
-            x, y, heading = frenet2world(s, d, center_line_xlist, center_line_ylist, center_line_slist)
+            # 세그먼트 끝단을 벗어나는 경우를 막기 위해 s 범위를 제한
+            s_clamped = np.clip(s, center_line_slist[0], center_line_slist[-1])
+            x, y, heading = frenet2world(s_clamped, d, center_line_xlist, center_line_ylist, center_line_slist)
             fp.xlist.append(x)
             fp.ylist.append(y)
             center_headings.append(heading)
@@ -391,4 +395,3 @@ def check_valid_path(paths, obs):
 def generate_opt_path(valid_paths):
     opt_path = min(valid_paths, key=lambda p: p.tot_cost)
     return opt_path
-
