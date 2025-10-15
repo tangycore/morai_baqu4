@@ -43,22 +43,22 @@ SHOW_OPT_PATH = True
 SHOW_VALID_PATH = True
 
 # cost config
-K_J   = 0.1
-K_T   = 100
-K_D   = 150.0
-K_S   = 1.0
-K_LAT = 1.0
-K_LON = 1.0
+K_J   = 0.1 # jerk config
+K_T   = 100 # time cost config (얼마나 빠르게 도달 할건지)
+K_D   = 150.0 # lateral cost config
+K_S   = 1.0 # longitunial cost config
+
+K_LAT = 1.0 # lateral cost config when combine lateral and longitunial traj
+K_LON = 1.0  # longitunial cost config when combine lateral and longitunial traj
 
 
 DESIRED_LAT_POS = 0
-FINAL_DESIRED_SPEED = 10
-DESIRED_SPEED = 5
-DESIRED_DISTACE = 6
+FINAL_DESIRED_SPEED = 20 # 현재 차량이 최고 도달 할 수 있는 속도
+
+# 속도, 가속도, 곡률 최대값
 V_MAX = 10
 ACC_MAX = 7
-K_MAX = 5
-MAX_LAT_ACC = 2.5
+K_MAX = 0.3
 
 # Car config
 # The unit is in meters.
@@ -74,7 +74,7 @@ TW = 0.48
 MAX_STEER = np.deg2rad(40)  # rad
 SPEED = 1.0
 
-BUBBLE_R = (WHEEL_BASE) / 2
+BUBBLE_R = (WHEEL_BASE) / 2 # for collision check
 
 # Local reference line segmentation (meters)
 LOCAL_REF_WINDOW_M = 320.0
