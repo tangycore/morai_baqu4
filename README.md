@@ -18,13 +18,20 @@ roslaunch rosbridge_server rosbridge_websocket.launch
 chmod +x ~/baqu4_morai_ws/src/해당 패키지/scripts/*.py
 ```
 
+3. 시뮬레이터 실행
 
-3. TF/노드/네트워크 키기
+4. TF/노드/네트워크 키기
 ```bash
 roslaunch baqu4_tf baqu4_tf.launch
 roslaunch baqu4_udp baqu4_udp.launch
 roslaunch control control.launch
 roslaunch planning_pkg planning.launch
+```
+
+5. 차량 제어 시작
+```bash
+roscd control
+cd scripts && python3 ego_control_pub.py
 ```
 
 push after git sync
