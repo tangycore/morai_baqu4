@@ -42,12 +42,12 @@ class EgoControlPub :
         self.last_opt_path_time = rospy.Time.now()
         self.opt_path_timeout = rospy.Duration(0.1) 
         self.current_speed = 0
-        self.target_speed = 1
-
+        self.target_speed = 0
         self.is_path = False
         self.is_odom = False
 
-        self.pid = PIDController(0.3, 0.07, 0.1)
+        # PID 게인을 m/s 기준으로 재튜닝
+        self.pid = PIDController(1.08, 0.252, 1.08)
         self.pure_pursuit = PurePursuit(3.0, np.deg2rad(40), 0.5, 5)
 
     def ctrl_pub(self):
@@ -63,7 +63,10 @@ class EgoControlPub :
 
                 curr_ego_state = (self.current_postion.x, self.current_postion.y, self.vehicle_yaw, self.current_speed)
                 steer_angle = self.pure_pursuit.steer_control(curr_ego_state, self.path)
-                accel, brake, aout = self.pid.accel_control(self.current_speed * 3.6, min(35, self.target_speed * 3.6), 0.02)
+                # 계획 속도를 10m/s(≈36km/h)로 제한해 PID 과도 응답 방지
+                self.target_speed = min(10, self.target_speed)
+                print(f"steer: {steer_angle}")
+                accel, brake, aout = self.pid.accel_control(self.current_speed, self.target_speed, 0.02)
 
                 rospy.loginfo(f"{self.current_speed * 3.6:.2f}, {self.target_speed * 3.6:.2f} | "
                             f"steer : {np.rad2deg(steer_angle):.2f}, accel: {accel:.3f}, brake: {brake:.3f}, aout: {aout:.3f}")
@@ -84,6 +87,7 @@ class EgoControlPub :
         self.path = msg
         self.pid.intergral = 0.0
         self.pid.prev_error = 0.0
+        self.target_speed_idx = 0
         self.last_opt_path_time = rospy.Time.now()
 
     def odom_callback(self, msg):
@@ -95,6 +99,7 @@ class EgoControlPub :
 
     def plan_velocity_callback(self, msg):
         self.current_speed = msg.current_speed
+        # planning 노드에서 전달한 목표 속도는 m/s 단위로 그대로 사용
         self.target_speed = msg.target_speed
 
 if __name__ == '__main__':

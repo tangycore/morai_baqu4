@@ -7,10 +7,11 @@ class PIDController:
         self.KD = KD
         self.intergral = 0.0
         self.prev_error = 0.0
+        self.integral_guard = 5.0 / 3.6  # 약 5km/h 이하 오차에서만 적분 항 누적
 
     def accel_control(self, curr_v, target_v, dt):
         error = target_v - curr_v
-        if error <= 5:
+        if error <= self.integral_guard:
             self.intergral += error * dt
         derivative = (error - self.prev_error) / dt if dt > 0 else 0.0
 
@@ -18,8 +19,8 @@ class PIDController:
         self.prev_error = error
 
         # --- 물리 한계 스케일링 ---
-        ACCEL_MAX = 3.0  # [m/s²]
-        BRAKE_MAX = 5.0  # [m/s²]
+        ACCEL_MAX = 6.0  # [m/s²]
+        BRAKE_MAX = 8.0  # [m/s²]
         THROTTLE_OFFSET = 0.05  # 정지 마찰 극복용
 
         if out_acc >= 0:
@@ -27,6 +28,6 @@ class PIDController:
             brake = 0.0
         else:
             accel = 0.0
-            brake = np.clip(-out_acc / BRAKE_MAX, 0.0, 1.0)
+            brake = np.clip(-out_acc / BRAKE_MAX, 0.0, 0.5)
 
         return accel, brake, out_acc

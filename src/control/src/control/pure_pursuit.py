@@ -27,7 +27,6 @@ class PurePursuit:
 
     def find_lookahead_point(self, state, traj):
         ld = max(self.K_LD * state[3] * 3.6, self.min_ld)
-        print(f"ld: {ld}")
         dx = traj[0] - state[0] 
         dy = traj[1] - state[1]
         d = np.hypot(dx, dy)
@@ -50,13 +49,15 @@ class PurePursuit:
         dy = traj[1][ld_idx] - state[1]
         plt.cla()
         plt.plot(traj[0], traj[1])
-        plt.plot(traj[0][ld_idx], traj[1][ld_idx], 'xr')
-        plt.plot(state[0], state[1], 'xb')
+        plt.plot(traj[0][ld_idx], traj[1][ld_idx], 'xr', label='LookAhead')
+        plt.plot(state[0], state[1], 'xb', label='Ego')
         plt.axis('equal')
+        plt.title('pure pursuit')
+        plt.legend()
         plt.pause(0.001)
         alpha = pi_2_pi(np.arctan2(dy, dx) - state[2])
-        if abs(alpha) < np.deg2rad(1.0):  # 작은 각 무시 (직진 안정화)
-            alpha = 0.0
+        # if abs(alpha) < np.deg2rad(1.0):  # 작은 각 무시 (직진 안정화)
+        #     alpha = 0.0
         print(f"local dx: {dx}, dy: {dy}")
         print(f"alpha: {np.rad2deg(alpha)}, yaw: {np.rad2deg(state[2])}, {np.rad2deg(np.arctan2(dy, dx))}")
         delta = np.arctan2(2 * self.wheel_base * np.sin(alpha), np.hypot(dx, dy))
