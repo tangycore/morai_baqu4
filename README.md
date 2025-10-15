@@ -28,3 +28,10 @@ roslaunch planning_pkg planning.launch
 ```
 
 push after git sync
+
+---
+
+### Planning
+ - [바로가기](./src/planning)
+### Control
+- [바로가기](./src/cotnrol)
