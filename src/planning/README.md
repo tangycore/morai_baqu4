@@ -29,7 +29,7 @@
 - `msg/PlanVelocityInfo.msg` – 제어기 연동 메시지 (current speed, target speed)
 
 ## Configuration
-- 파라미터 (`planning/src/planning_pkg/config.py`)
+- 파라미터 설명 파일 주석 참고 (`planning/src/planning_pkg/config.py`)
 - 속도/가속도 제한, 비용 계수 튜닝 planning에서 사용하는 대부분의 파라미터 설정 가능
 
 ## Running
