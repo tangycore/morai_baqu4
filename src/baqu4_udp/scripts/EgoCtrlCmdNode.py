@@ -14,7 +14,7 @@ from morai_udp.network.UDP import Sender
 from morai_udp.define.EgoCtrlCmd import EgoCtrlCmd
 
 import rospy
-
+from morai_msgs.msg import CtrlCmd
 
 def clamp(x, lo, hi):
     return lo if x < lo else (hi if x > hi else x)
@@ -26,13 +26,8 @@ def main():
     dst_ip     = rospy.get_param("~dst_ip", "192.168.0.100")
     dst_port   = int(rospy.get_param("~dst_port", 9123))       # 포트: 대회 공지값으로 교체
     tx_rate_hz = float(rospy.get_param("~tx_rate_hz", 30.0))
-
-    # 디버그/초기값(알고리즘 미연동 시 테스트용)
-    accel0 = float(rospy.get_param("~accel", 0.0))             # 0.0~1.0
-    brake0 = float(rospy.get_param("~brake", 0.0))             # 0.0~1.0
-    steer0 = float(rospy.get_param("~steer", 0.0))             # -1.0~1.0
-    log_throttle_sec = float(rospy.get_param("~log_throttle_sec", 1.0))
-
+    cmd_topic = rospy.get_param("~cmd_topic", "/ctrl_cmd")
+    
     try:
         tx = Sender(dst_ip, dst_port)
     except Exception as e:
@@ -42,33 +37,40 @@ def main():
     rospy.loginfo(f"[EgoCtrlCmd] sending to {dst_ip}:{dst_port} at {tx_rate_hz:.1f} Hz")
 
     cmd = EgoCtrlCmd()
-    cmd.cmd_type = 1
+    cmd.cmd_type = 1                      # 규정: longi type 1번(accel, break, steering)
+
+    last_cmd = {"accel": None, "brake": None, "steering": None}
+    last_ts  = 0.0
+
+    # control 출력 구독: accel, brake, steering만 사용
+    def _on_ctrl(m: CtrlCmd):
+        a = clamp(getattr(m, "accel", 0.0),  0.0, 1.0)
+        b = clamp(getattr(m, "brake", 0.0),  0.0, 1.0)
+        s = clamp(getattr(m, "steering", 0.0), -1.0, 1.0)
+        if b > 0.0:                                                               # 브레이크 우선
+            a = 0.0
+        last_cmd["accel"], last_cmd["brake"], last_cmd["steering"] = a, b, s
+        nonlocal last_ts
+        last_ts = time.time()
+
+    rospy.Subscriber(cmd_topic, CtrlCmd, _on_ctrl, queue_size=10)
 
     rate = rospy.Rate(tx_rate_hz)
-    last_log = 0.0
+
 
     while not rospy.is_shutdown():
-        # 테스트/초기값(알고리즘 연동 전): 파라미터로 준 값을 보냄
-        accel = clamp(accel0, 0.0, 1.0)
-        brake = clamp(brake0, 0.0, 1.0)
-        steer = clamp(steer0, -1.0, 1.0)
-
-        if brake > 0.0:                   # 브레이크 우선
-            accel = 0.0
-
-        cmd.accel = accel
-        cmd.brake = brake
-        cmd.steer = steer
-
-        try:
-            tx.send(cmd)
-        except Exception as e:
-            rospy.logerr_throttle(1.0, f"[EgoCtrlCmd] send error: {e}")
-
-        now = time.time()
-        if now - last_log >= log_throttle_sec:
-            rospy.loginfo(f"[EgoCtrlCmd] a={accel:.2f} b={brake:.2f} s={steer:.2f}")
-            last_log = now
+        a, b, s = last_cmd["accel"], last_cmd["brake"], last_cmd["steering"]
+        if a is not None and b is not None and s is not None:
+            cmd.accel = a
+            cmd.brake = b
+            cmd.steering = s
+            try:
+                tx.send(cmd)
+            except Exception as e:
+                rospy.logerr_throttle(1.0, f"[EgoCtrlCmd] send error: {e}")
+        else:
+            # 아직 control에서 첫 메시지를 못 받았으면 아무것도 보내지 않음
+            rospy.logwarn_throttle(2.0, "[EgoCtrlCmd] waiting for /ctrl_cmd ...")
 
         rate.sleep()
 

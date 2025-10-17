@@ -17,9 +17,7 @@
     <param name="ip" value="$(arg dst_ip)"/>
     <param name="port" value="$(arg ctrl_port)"/>
     <param name="rate_hz" value="$(arg rate_hz)"/>
-    <param name="accel" value="0.0"/>
-    <param name="brake" value="0.0"/>
-    <param name="steer" value="0.0"/>
+    <param name="cmd_topic" value="/ctrl_cmd"/>
   </node>
 
 </launch>
