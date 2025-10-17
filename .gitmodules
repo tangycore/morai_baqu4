@@ -1,5 +1,5 @@
-[submodule "src/MORAI-ROS_morai_msgs"]
-	path = src/MORAI-ROS_morai_msgs
+[submodule "src/morai_msgs"]
+	path = src/morai_msgs
 	url = git@github.com:MORAI-Autonomous/MORAI-ROS_morai_msgs.git
 	branch = master
 [submodule "src/morai_common"]
