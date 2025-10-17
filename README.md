@@ -23,7 +23,7 @@ chmod +x ~/baqu4_morai_ws/src/해당 패키지/scripts/*.py
 4. TF/노드/네트워크 키기
 ```bash
 roslaunch baqu4_tf baqu4_tf.launch
-roslaunch baqu4_udp final_mission.launch
+roslaunch baqu4_udp final_mission.launch || roslaunch baqu4_udp ai_mission.launch
 roslaunch control control.launch
 roslaunch planning_pkg planning.launch
 ```
