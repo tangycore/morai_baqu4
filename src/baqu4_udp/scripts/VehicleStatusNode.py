@@ -26,8 +26,8 @@ def copy_into_msg(dst, src):
 def main():
     rospy.init_node("competition_vehicle_status_listener", anonymous=False)
     ip   = rospy.get_param("~ip", "0.0.0.0")
-    port = int(rospy.get_param("~port", 9121))                # 포트 추후 변경
-    hz   = float(rospy.get_param("~rate_hz", 20.0))
+    port = int(rospy.get_param("~port", 9121))                # 포트: 대회 공지값으로 교체
+    hz   = float(rospy.get_param("~rate_hz", 30.0))
 
     recv = Receiver(ip, port, EgoVehicleStatus())
     pub  = rospy.Publisher("/morai/competition_status", EgoVehicleStatusMsg, queue_size=10)
