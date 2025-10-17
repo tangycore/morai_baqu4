@@ -12,7 +12,7 @@
     <param name="rate_hz" value="$(arg rate_hz)"/>
   </node>
 
-  <node pkg="baqu4_udp" type="CompetitionVehicleStatusNode.py" name="competition_vehicle_status_node" required="true" output="screen">
+  <node pkg="baqu4_udp" type="VehicleStatusNode.py" name="competition_vehicle_status_node" required="true" output="screen">
     <param name="bind_ip" value="$(arg bind_ip)"/>
     <param name="port" value="$(arg competition_port)"/>
     <param name="rate_hz" value="$(arg rate_hz)"/>

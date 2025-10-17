@@ -10,6 +10,6 @@ catkin_package()
 
 catkin_install_python(PROGRAMS
   scripts/CollisionDataNode.py
-  scripts/CompetitionVehicleStatusNode.py
+  scripts/VehicleStatusNode.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
