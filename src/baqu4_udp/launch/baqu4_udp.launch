@@ -1,19 +1,19 @@
 <launch>
-  <arg name="ip"               default="127.0.0.1"/>
+  <arg name="bind_ip"               default="192.168.0.11"/>
   <arg name="collision_port"   default="9122"/>
   <arg name="competition_port" default="9121"/>
   <arg name="rate_hz"          default="20"/>
 
   <env name="PYTHONPATH" value="$(find baqu4_udp)/vendor/morai_udp:$(optenv PYTHONPATH)"/>
 
-  <node pkg="baqu4_udp" type="CollisionDataNode.py" name="collision_data_node" output="screen">
-    <param name="ip" value="$(arg ip)"/>
+  <node pkg="baqu4_udp" type="CollisionDataNode.py" name="collision_data_node" required="true" output="screen">
+    <param name="bind_ip" value="$(arg bind_ip)"/>
     <param name="port" value="$(arg collision_port)"/>
     <param name="rate_hz" value="$(arg rate_hz)"/>
   </node>
 
-  <node pkg="baqu4_udp" type="CompetitionVehicleStatusNode.py" name="competition_vehicle_status_node" output="screen">
-    <param name="ip" value="$(arg ip)"/>
+  <node pkg="baqu4_udp" type="CompetitionVehicleStatusNode.py" name="competition_vehicle_status_node" required="true" output="screen">
+    <param name="bind_ip" value="$(arg bind_ip)"/>
     <param name="port" value="$(arg competition_port)"/>
     <param name="rate_hz" value="$(arg rate_hz)"/>
   </node>

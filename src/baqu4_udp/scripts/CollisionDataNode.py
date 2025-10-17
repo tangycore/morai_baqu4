@@ -25,8 +25,8 @@ def copy_into_msg(dst, src):
 
 def main():
     rospy.init_node("collision_data_listener", anonymous=False)
-    ip   = rospy.get_param("~ip", "127.0.0.1")
-    port = int(rospy.get_param("~port", 9122))
+    ip   = rospy.get_param("~ip", "0.0.0.0")
+    port = int(rospy.get_param("~port", 9122))              # 포트 추후 변경
     hz   = float(rospy.get_param("~rate_hz", 20.0))
 
     recv = Receiver(ip, port, CollisionData())
