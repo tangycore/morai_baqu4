@@ -18,6 +18,8 @@
     <param name="port" value="$(arg ctrl_port)"/>
     <param name="rate_hz" value="$(arg rate_hz)"/>
     <param name="cmd_topic" value="/ctrl_cmd"/>
+    <param name="steer_is_radian" value="true" type="bool"/>
+    <param name="max_steer_deg" value="40.0"/>
   </node>
 
 </launch>
