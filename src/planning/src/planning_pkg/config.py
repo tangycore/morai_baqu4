@@ -56,9 +56,10 @@ DESIRED_LAT_POS = 0
 FINAL_DESIRED_SPEED = 20 # 현재 차량이 최고 도달 할 수 있는 속도
 
 # 속도, 가속도, 곡률 최대값
-V_MAX = 10
+V_MAX = 12
 ACC_MAX = 7
-K_MAX = 0.3
+K_MAX = 20
+LAT_ACCEL_MAX = 4.0  # allowable lateral acceleration (m/s^2) for curvature-based speed limiting
 
 # Car config
 # The unit is in meters.

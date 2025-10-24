@@ -382,6 +382,7 @@ def check_valid_path(paths, obs):
             continue
         elif any([abs(kappa) > K_MAX for kappa in path.kappa]):
             ck += 1
+            # rospy.logwarn(f"max kappa : {max(path.kappa)}")
             continue
         elif not is_forward_motion(path):
             cb += 1

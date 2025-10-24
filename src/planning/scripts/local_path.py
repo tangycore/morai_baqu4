@@ -16,6 +16,7 @@ from planning_pkg.config import (
     FINAL_DESIRED_SPEED,
     LOCAL_REF_WINDOW_M,
     LOCAL_REF_BACKWARD_M,
+    LAT_ACCEL_MAX,
 )
 from planning_pkg.msg import PlanVelocityInfo
 
@@ -106,6 +107,7 @@ class LocalPath:
         self.s0, self.s1, self.s2 = 0, 0, 0
         self.d0, self.d1, self.d2 = 0, 0, 0
         self.setup_reference_line() # init start state
+        self.no_valid_path_cnt = 0
 
     def status_callback(self, msg):
         self.is_status = True
@@ -323,8 +325,9 @@ class LocalPath:
 
         if not fplist:
             rospy.logwarn("No valid path.")
+            self.no_valid_path_cnt += 1
             self.plan_velocity_info_msg.current_speed = self.ego_state.v 
-            self.plan_velocity_info_msg.target_speed = self.prev_opt_target_speed
+            self.plan_velocity_info_msg.target_speed = self.prev_opt_target_speed if self.no_valid_path_cnt <= 2 else 0
             self.plan_velocity_info_msg.timestamp = rospy.Time.now().to_sec()
             return
         
@@ -338,19 +341,27 @@ class LocalPath:
         self.valid_local_path_msg = valid_paths
         
         opt_path = generate_opt_path(fplist)
-        target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 1)))
-        while target_v_idx < len(opt_path.s1) - 1 and opt_path.s1[target_v_idx] < self.ego_state.v:
-            target_v_idx += 1
+        self.no_valid_path_cnt = 0
+        target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 6)))
+        # while target_v_idx < len(opt_path.s1) - 1 and opt_path.s1[target_v_idx] < self.ego_state.v:
+        #     target_v_idx += 1
         # PID 입력은 실제 속도와 동일한 단위(m/s)로 전달
         self.plan_velocity_info_msg.current_speed = self.ego_state.v
-        self.plan_velocity_info_msg.target_speed = opt_path.s1[-1]
+        curvature = abs(opt_path.kappa[target_v_idx]) if len(opt_path.kappa) > target_v_idx else 0.0
+        if curvature > 1e-6:
+            curvature_speed_limit = math.sqrt(max(LAT_ACCEL_MAX / curvature, 0.0))
+        else:
+            curvature_speed_limit = FINAL_DESIRED_SPEED
+        # 곡률 기반 타겟 속도 제한
+        target_speed = min(opt_path.s1[target_v_idx], curvature_speed_limit, FINAL_DESIRED_SPEED)
+        self.plan_velocity_info_msg.target_speed = max(target_speed, 0.0)
         self.plan_velocity_info_msg.timestamp = rospy.Time.now().to_sec()
         self.opt_local_path_msg = self.frenet_path_to_msg(opt_path)
-        self.prev_opt_target_speed = opt_path.s1[target_v_idx]
+        self.prev_opt_target_speed = self.plan_velocity_info_msg.target_speed
         
         
     def publish_path(self):
-        rate = rospy.Rate(5)  # 5Hz
+        rate = rospy.Rate(10)  # 10Hz
         while not rospy.is_shutdown():
             self.opt_local_path_msg.header.stamp = rospy.Time.now()
             self.update_frenet_state()
