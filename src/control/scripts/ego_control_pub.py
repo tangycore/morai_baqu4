@@ -47,7 +47,7 @@ class EgoControlPub :
         self.is_odom = False
 
         # PID 게인을 m/s 기준으로 재튜닝
-        self.pid = PIDController(1.08, 0.252, 1.08)
+        self.pid = PIDController(0.88, 0.182, 1.08)
         self.pure_pursuit = PurePursuit(3.0, np.deg2rad(40), 0.5, 5)
 
     def ctrl_pub(self):
