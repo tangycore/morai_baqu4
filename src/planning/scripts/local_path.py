@@ -84,7 +84,7 @@ class LocalPath:
 
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
         rospy.Subscriber("/global_path", Path, self.global_path_callback)
-        rospy.Subscriber("/Ego_topic", EgoVehicleStatus, self.status_callback)
+        rospy.Subscriber("/morai/competition_status", EgoVehicleStatus, self.status_callback)
 
         self.ego_state = VehicleState()
         self.global_path = None
