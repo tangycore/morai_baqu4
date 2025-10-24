@@ -1,6 +1,6 @@
 <launch>
-  <arg name="bind_ip"          default="192.168.0.11"/>
-  <arg name="dst_ip"           default="192.168.0.100"/>
+  <arg name="bind_ip"          default="127.0.0.1"/>
+  <arg name="dst_ip"           default="127.0.0.1"/>
   <arg name="ctrl_port"        default="9123"/>
   <arg name="status_port"      default="9121"/>
   <arg name="rate_hz"          default="30"/>

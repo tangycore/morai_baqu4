@@ -5,10 +5,10 @@
 0. 포트번호 설정 (Destination Only)
    - CollisionData - 9122 
    - Competition Vehicle Status - 9121
-
+   - Ego Ctrl Cmd - 9123
 1. MORAI 네트워크 설정  
    - CollisionData, Competition Vehicle Status, LiDAR: UDP
-   - Ego Ctrl Cmd, IMU, CAM, GPS: ROS
+   - IMU, CAM, GPS: ROS
 ```bash
 roslaunch rosbridge_server rosbridge_websocket.launch
 ```
