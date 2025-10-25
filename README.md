@@ -26,6 +26,7 @@ roslaunch baqu4_tf baqu4_tf.launch
 roslaunch baqu4_udp final_mission.launch || roslaunch baqu4_udp ai_mission.launch
 roslaunch control control.launch
 roslaunch planning_pkg planning.launch
+roslaunch lidar_clustering lidar_clustering.launch
 ```
 
 5. 차량 제어 시작
@@ -37,7 +38,8 @@ cd scripts && python3 ego_control_pub.py
 push after git sync
 
 ---
-
+### Perception
+ - [바로가기](./src/perception)
 ### Planning
  - [바로가기](./src/planning)
 ### Control

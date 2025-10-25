@@ -1,170 +1,387 @@
-#include <clustering_cxx/clustering.hxx>
-#include <clustering_cxx/parameters.hxx>
-#include <dbscan_kdtree/DBSCAN_precomp.h>
-#include <omp.h>
-#include <pcl/PointIndices.h>
+/**
+ * LiDAR Clustering Node for MORAI Simulator
+ * Modified from tracker_with_cloud_node for clustering-only functionality
+ */
+
+#include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <std_msgs/Header.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <vision_msgs/Detection3D.h>
+#include <vision_msgs/Detection3DArray.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <tf2_ros/transform_listener.h>
+
 #include <pcl/common/common.h>
-#include <pcl/common/io.h>
-#include <pcl/impl/point_types.hpp>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/point_cloud.h>
-#include <pcl/search/kdtree.h>
-#include <rmw/qos_profiles.h>
-#include <sensor_msgs/msg/detail/point_cloud2__struct.hpp>
-#include <vision_msgs/msg/detail/bounding_box3_d__struct.hpp>
-#include <visualization.h>
+#include <pcl/common/pca.h>
+#include <pcl/common/transforms.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 
-ClusteringNode::ClusteringNode() : Node("clustering_node") {
-  this->declare_parameter(LIDAR_TOPIC, rclcpp::PARAMETER_STRING);
-  this->declare_parameter(PARAM_MIN_CORE_POINTS, rclcpp::PARAMETER_INTEGER);
-  this->declare_parameter(PARAM_MIN_CLUSTER_SIZE, rclcpp::PARAMETER_INTEGER);
-  this->declare_parameter(PARAM_MAX_CLUSTER_SIZE, rclcpp::PARAMETER_INTEGER);
-  this->declare_parameter(PARAM_TOLERANCE, rclcpp::PARAMETER_DOUBLE);
+#include <Eigen/Dense>
+#include <omp.h>
 
-  this->get_parameter_or<std::string>(LIDAR_TOPIC, this->lidar_topic_,
-                                      "/ouster/points");
-  this->get_parameter_or<uint32_t>(PARAM_MIN_CORE_POINTS,
-                                   this->min_core_points_, 3);
-  this->get_parameter_or<uint32_t>(PARAM_MIN_CLUSTER_SIZE,
-                                   this->min_cluster_size_, 3);
-  this->get_parameter_or<uint32_t>(PARAM_MAX_CLUSTER_SIZE,
-                                   this->max_cluster_size_, 10);
-  this->get_parameter_or<double>(PARAM_TOLERANCE, this->tolerance_, 0.2);
+// DBSCAN 헤더 포함 (프로젝트에 있는 파일 사용)
+#include "dbscan_kdtree/DBSCAN_kdtree.h"
 
-  this->lidar_sub_.subscribe(this, this->lidar_topic_, rmw_qos_profile_sensor_data);
-  this->lidar_sub_.registerCallback(&ClusteringNode::lidarCallback, this);
+class LidarClusterNode
+{
+private:
+  ros::NodeHandle nh_;
+  ros::NodeHandle pnh_;
+  
+  // Publishers
+  ros::Publisher cluster_cloud_pub_;
+  ros::Publisher detection3d_pub_;
+  ros::Publisher marker_pub_;
+  
+  // Subscriber
+  ros::Subscriber lidar_sub_;
+  
+  // TF
+  boost::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  boost::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+  
+  // Parameters
+  std::string lidar_topic_;
+  std::string output_frame_;
+  std::string cluster_result_topic_;
+  float cluster_tolerance_;
+  int min_cluster_size_;
+  int max_cluster_size_;
+  
+  // Downsampling parameters
+  float max_distance_;
+  float min_x_;
+  float max_z_;
+  float min_z_;
+  float min_y_;
+  float max_y_;
+  
+  ros::Time last_call_time_;
 
-  this->lidar_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
-      "/clustering/points", 10);
-  this->visualization_pub_ =
-      this->create_publisher<visualization_msgs::msg::MarkerArray>(
-          "/clustering/visualization", 10);
-  this->box3d_pub_ =
-      this->create_publisher<vision_msgs::msg::BoundingBox3DArray>(
-          "/clustering/result", 10);
-
-  this->timer_ =
-      this->create_wall_timer(std::chrono::milliseconds(200),
-                              std::bind(&ClusteringNode::timerCallback, this));
-
-  RCLCPP_INFO(this->get_logger(),
-              "MIN_CORE_POINTS: %d "
-              "MIN_CLUSTER_SIZE: %d "
-              "MAX_CLUSTER_SIZE: %d "
-              "TOLERANCE: %lf \n",
-              this->min_core_points_, this->min_cluster_size_,
-              this->max_cluster_size_, this->tolerance_);
-}
-
-std::vector<pcl::PointIndices> ClusteringNode::makeClusterVector(
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pclCloud) {
-  std::vector<pcl::PointIndices> cluster_indices;
-  DBSCANPrecompCluster<pcl::PointXYZ> dc;
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(
-      new pcl::search::KdTree<pcl::PointXYZ>);
-  tree->setInputCloud(pclCloud);
-
-  dc.setSearchMethod(tree);
-
-  dc.setCorePointMinPts(this->min_core_points_);
-  dc.setMinClusterSize(this->min_cluster_size_);
-  dc.setMaxClusterSize(this->max_cluster_size_);
-  dc.setClusterTolerance(this->tolerance_);
-  dc.setInputCloud(pclCloud);
-  dc.extract(cluster_indices);
-
-  RCLCPP_INFO(this->get_logger(), "Size: %ld", cluster_indices.size());
-
-  return cluster_indices;
-}
-
-void ClusteringNode::lidarCallback(
-    sensor_msgs::msg::PointCloud2::ConstSharedPtr cloud) {
-  static rclcpp::Time time(0);
-  if (time.nanoseconds() == 0) {
-    time = this->clock_.now();
+public:
+  LidarClusterNode() : pnh_("~")
+  {
+    // 파라미터 로드
+    pnh_.param<std::string>("lidar_topic", lidar_topic_, "/front_lidar/velodyne_points");
+    pnh_.param<std::string>("output_frame", output_frame_, "base_link");
+    pnh_.param<std::string>("cluster_result_topic", cluster_result_topic_, "cluster_result");
+    pnh_.param<float>("cluster_tolerance", cluster_tolerance_, 0.5);
+    pnh_.param<int>("min_cluster_size", min_cluster_size_, 20);
+    pnh_.param<int>("max_cluster_size", max_cluster_size_, 25000);
+    
+    // Downsampling parameters
+    pnh_.param<float>("max_distance", max_distance_, 50.0);
+    pnh_.param<float>("min_x", min_x_, 1.0);
+    pnh_.param<float>("max_z", max_z_, -0.5);
+    pnh_.param<float>("min_z", min_z_, -2.0);
+    pnh_.param<float>("min_y", min_y_, -5.0);  // 우측
+    pnh_.param<float>("max_y", max_y_, 5.0);   // 좌측
+    
+    // Publishers
+    cluster_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("cluster_cloud", 1);
+    detection3d_pub_ = nh_.advertise<vision_msgs::Detection3DArray>(cluster_result_topic_, 1);
+    marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>("cluster_markers", 1);
+    
+    // Subscriber
+    lidar_sub_ = nh_.subscribe(lidar_topic_, 1, &LidarClusterNode::lidarCallback, this);
+    
+    // TF setup
+    tf_buffer_.reset(new tf2_ros::Buffer(ros::Duration(2.0), true));
+    tf_listener_.reset(new tf2_ros::TransformListener(*tf_buffer_));
+    
+    last_call_time_ = ros::Time::now();
+    
+    ROS_INFO("LiDAR Cluster Node initialized");
+    ROS_INFO("Subscribing to: %s", lidar_topic_.c_str());
+    ROS_INFO("Cluster tolerance: %.2f", cluster_tolerance_);
+    ROS_INFO("Min cluster size: %d", min_cluster_size_);
+    ROS_INFO("Max cluster size: %d", max_cluster_size_);
   }
-
-  rclcpp::Time now = this->clock_.now();
-  rclcpp::Duration duration = now - time;
-  RCLCPP_INFO(this->get_logger(), "Duration: %lf", duration.seconds());
-
-  pcl::PointCloud<pcl::PointXYZ>::Ptr pclCloud(
-      new pcl::PointCloud<pcl::PointXYZ>());
-  pcl::fromROSMsg(*cloud, *pclCloud);
-
-  for (uint32_t i = 0; i < pclCloud->points.size();) {
-    auto const point = pclCloud->points[i];
-    float distance = point.x * point.x + point.y * point.y + point.z * point.z;
-
-    if (distance > 1000 || distance < 1 || point.z > -0.4) {
-      pclCloud->points[i] = pclCloud->points[pclCloud->points.size() - 1];
-      pclCloud->points.resize(pclCloud->points.size() - 1);
-    } else {
-      ++i;
+  
+  void lidarCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
+  {
+    ros::Time current_call_time = ros::Time::now();
+    ros::Duration callback_interval = current_call_time - last_call_time_;
+    last_call_time_ = current_call_time;
+    
+    // 1. 포인트 클라우드 다운샘플링
+    pcl::PointCloud<pcl::PointXYZ>::Ptr downsampled_cloud = downsampleCloudMsg(cloud_msg);
+    
+    if (downsampled_cloud->empty())
+    {
+      ROS_WARN("Downsampled cloud is empty!");
+      return;
     }
-  }
-
-  std::vector<pcl::PointIndices> clusters = makeClusterVector(pclCloud);
-  std::vector<std::vector<std::pair<Eigen::Vector4f, Eigen::Vector4f>>>
-      clustersPerThread(omp_get_max_threads());
-  std::vector<vision_msgs::msg::BoundingBox3D> boxes;
-  std::vector<std::vector<vision_msgs::msg::BoundingBox3D>> boxesPerThread(
-      omp_get_max_threads());
-
-#pragma omp parallel for
-  for (auto cluster = clusters.begin(); cluster != clusters.end(); ++cluster) {
-    if (cluster->indices.size() > this->min_cluster_size_) {
-      Eigen::Vector4f min_pt, max_pt, mid_pt, size_pt;
-      pcl::getMinMax3D(*pclCloud, cluster->indices, min_pt, max_pt);
-      mid_pt = (min_pt + max_pt) / 2;
-      size_pt = max_pt - min_pt;
-      if (size_pt.x() < 0.1 || size_pt.y() < 0.1 || size_pt.z() < 0.1)
-        continue;
-      if (size_pt.x() > 1.0 || size_pt.y() > 1.0 || size_pt.z() > 1.0)
-        continue;
-
-      vision_msgs::msg::BoundingBox3D box;
-      box.center.position.x = mid_pt.x();
-      box.center.position.y = mid_pt.y();
-      box.center.position.z = mid_pt.z();
-      box.size.x = std::max(0.01f, size_pt.x());
-      box.size.y = std::max(0.01f, size_pt.y());
-      box.size.z = std::max(0.01f, size_pt.z());
-
-      box.center.orientation.x = 0.0;
-      box.center.orientation.y = 0.0;
-      box.center.orientation.z = 0.0;
-      box.center.orientation.w = 1.0;
-
-      clustersPerThread[omp_get_thread_num()].push_back(std::make_pair(
-          mid_pt, Eigen::Vector4f{0.3f, 0.3f, size_pt.z(), 1.0f}));
-      boxesPerThread[omp_get_thread_num()].push_back(box);
+    
+    // 2. 필요시 좌표계 변환
+    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud;
+    if (cloud_msg->header.frame_id != output_frame_)
+    {
+      transformed_cloud = cloud2TransformedCloud(downsampled_cloud, 
+                                                 cloud_msg->header.frame_id, 
+                                                 output_frame_,
+                                                 cloud_msg->header.stamp);
     }
+    else
+    {
+      transformed_cloud = downsampled_cloud;
+    }
+    
+    // 3. Clustering 수행
+    std::vector<pcl::PointIndices> cluster_indices = euclideanClusterExtraction(transformed_cloud);
+    
+    if (cluster_indices.empty())
+    {
+      ROS_INFO("No clusters found");
+      return;
+    }
+    
+    // 4. 3D Detection 메시지 생성
+    vision_msgs::Detection3DArray detections3d_msg;
+    detections3d_msg.header = cloud_msg->header;
+    detections3d_msg.header.frame_id = output_frame_;
+    
+    pcl::PointCloud<pcl::PointXYZ> combined_cluster_cloud;
+    
+    for (const auto& cluster : cluster_indices)
+    {
+      // 각 클러스터에 대한 포인트 추출
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cluster_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      for (const auto& idx : cluster.indices)
+      {
+        cluster_cloud->points.push_back(transformed_cloud->points[idx]);
+        combined_cluster_cloud.points.push_back(transformed_cloud->points[idx]);
+      }
+      
+      // 3D bounding box 생성
+      createBoundingBox(detections3d_msg, cluster_cloud);
+    }
+    
+    // 5. Marker 생성
+    visualization_msgs::MarkerArray marker_array_msg = 
+        createMarkerArray(detections3d_msg, callback_interval.toSec());
+    
+    // 6. 결과 publish
+    detection3d_pub_.publish(detections3d_msg);
+    marker_pub_.publish(marker_array_msg);
+    
+    // Clustered points publish
+    sensor_msgs::PointCloud2 cluster_cloud_msg;
+    pcl::toROSMsg(combined_cluster_cloud, cluster_cloud_msg);
+    cluster_cloud_msg.header = detections3d_msg.header;
+    cluster_cloud_pub_.publish(cluster_cloud_msg);
+    
+    ROS_INFO("Published %lu clusters", detections3d_msg.detections.size());
   }
-
-  for (auto clusters = clustersPerThread.begin();
-       clusters < clustersPerThread.end(); ++clusters) {
-    visualizeAnyPoint(this->visualization_pub_, "visualization", cloud->header,
-                      *clusters, {1, 0, 0, 1}, duration);
+  
+  pcl::PointCloud<pcl::PointXYZ>::Ptr downsampleCloudMsg(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
+  {
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::fromROSMsg(*cloud_msg, *cloud);
+    
+    float const max_squared_distance = max_distance_ * max_distance_;
+    
+    for (uint32_t i = 0; i < cloud->points.size(); ++i)
+    {
+      auto const& point = cloud->points[i];
+      float const squared_distance = std::pow(point.x, 2) + std::pow(point.y, 2) + std::pow(point.z, 2);
+      
+      // 거리, x, z 범위로 필터링
+      if (squared_distance > max_squared_distance || 
+          point.x < min_x_ ||
+          point.y < min_y_ ||      // 추가!
+          point.y > max_y_ ||  
+          point.z > max_z_ || 
+          point.z < min_z_)
+      {
+        cloud->points[i] = cloud->points[cloud->points.size() - 1];
+        cloud->points.resize(cloud->points.size() - 1);
+        --i;
+      }
+    }
+    
+    ROS_INFO("Downsampled cloud size: %lu", cloud->points.size());
+    return cloud;
   }
-
-  sensor_msgs::msg::PointCloud2::SharedPtr newCloud(
-      new sensor_msgs::msg::PointCloud2);
-  newCloud->header = cloud->header;
-  pcl::toROSMsg(*pclCloud, *newCloud);
-
-  vision_msgs::msg::BoundingBox3DArray box_array;
-  box_array.header = cloud->header;
-  for (const auto &thread_boxes : boxesPerThread) {
-    box_array.boxes.insert(box_array.boxes.end(), thread_boxes.begin(),
-                           thread_boxes.end());
+  
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2TransformedCloud(
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
+      const std::string& source_frame, 
+      const std::string& target_frame,
+      const ros::Time& stamp)
+  {
+    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    
+    try
+    {
+      geometry_msgs::TransformStamped tf = tf_buffer_->lookupTransform(
+          target_frame, source_frame, stamp, ros::Duration(0.1));
+      pcl_ros::transformPointCloud(*cloud, *transformed_cloud, tf.transform);
+      ROS_INFO("Transformed cloud from %s to %s", source_frame.c_str(), target_frame.c_str());
+    }
+    catch (tf2::TransformException& e)
+    {
+      ROS_WARN("TF transform failed: %s", e.what());
+      return cloud;  // 변환 실패시 원본 반환
+    }
+    
+    return transformed_cloud;
   }
+  
+  std::vector<pcl::PointIndices> euclideanClusterExtraction(
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+  {
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+    std::vector<pcl::PointIndices> cluster_indices;
+    DBSCANKdtreeCluster<pcl::PointXYZ> dc;
+    
+    tree->setInputCloud(cloud);
+    
+    dc.setCorePointMinPts(min_cluster_size_);
+    dc.setMinClusterSize(min_cluster_size_);
+    dc.setMaxClusterSize(max_cluster_size_);
+    dc.setClusterTolerance(cluster_tolerance_);
+    dc.setSearchMethod(tree);
+    dc.setInputCloud(cloud);
+    dc.extract(cluster_indices);
+    
+    ROS_INFO("Found %lu clusters", cluster_indices.size());
+    return cluster_indices;
+  }
+  
+  void createBoundingBox(
+      vision_msgs::Detection3DArray& detections3d_msg, 
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+  {
+    if (cloud->points.empty())
+      return;
+    
+    vision_msgs::Detection3D detection3d;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointXYZ min_pt, max_pt;
+    Eigen::Vector4f centroid;
+    
+    // 중심점 계산
+    pcl::compute3DCentroid(*cloud, centroid);
+    
+    // Z축 회전 각도 계산 (물체가 중심을 향하도록)
+    double theta = -atan2(centroid[1], sqrt(pow(centroid[0], 2) + pow(centroid[2], 2)));
+    
+    // 회전 변환 적용
+    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+    transform.rotate(Eigen::AngleAxisf(theta, Eigen::Vector3f::UnitZ()));
+    pcl::transformPointCloud(*cloud, *transformed_cloud, transform);
+    
+    // Min/Max 계산
+    pcl::getMinMax3D(*transformed_cloud, min_pt, max_pt);
+    
+    // Bounding box 중심 계산
+    Eigen::Vector4f transformed_bbox_center = Eigen::Vector4f(
+        (min_pt.x + max_pt.x) / 2, 
+        (min_pt.y + max_pt.y) / 2, 
+        (min_pt.z + max_pt.z) / 2, 
+        1);
+    Eigen::Vector4f bbox_center = transform.inverse() * transformed_bbox_center;
+    Eigen::Quaternionf q(transform.inverse().rotation());
+    
+    // Detection3D 메시지 채우기
+    detection3d.bbox.center.position.x = bbox_center[0];
+    detection3d.bbox.center.position.y = bbox_center[1];
+    detection3d.bbox.center.position.z = bbox_center[2];
+    detection3d.bbox.center.orientation.x = q.x();
+    detection3d.bbox.center.orientation.y = q.y();
+    detection3d.bbox.center.orientation.z = q.z();
+    detection3d.bbox.center.orientation.w = q.w();
+    detection3d.bbox.size.x = max_pt.x - min_pt.x;
+    detection3d.bbox.size.y = max_pt.y - min_pt.y;
+    detection3d.bbox.size.z = max_pt.z - min_pt.z;
+    
+    // 결과 추가 (클래스 ID는 unknown으로 설정)
+    vision_msgs::ObjectHypothesisWithPose result;
+    result.id = 0;  // unknown object
+    result.score = 1.0;
+    detection3d.results.push_back(result);
+    
+    detections3d_msg.detections.push_back(detection3d);
+  }
+  
+  visualization_msgs::MarkerArray createMarkerArray(
+      const vision_msgs::Detection3DArray& detections3d_msg, 
+      const double& duration)
+  {
+    visualization_msgs::MarkerArray marker_array;
+    
+    // Delete all previous markers
+    visualization_msgs::Marker delete_marker;
+    delete_marker.header = detections3d_msg.header;
+    delete_marker.ns = "clusters";
+    delete_marker.id = 0;
+    delete_marker.action = visualization_msgs::Marker::DELETEALL;
+    marker_array.markers.push_back(delete_marker);
+    
+    // Create markers for each detection
+    for (size_t i = 0; i < detections3d_msg.detections.size(); i++)
+    {
+      const auto& det = detections3d_msg.detections[i];
+      
+      if (std::isfinite(det.bbox.size.x) &&
+          std::isfinite(det.bbox.size.y) &&
+          std::isfinite(det.bbox.size.z))
+      {
+        visualization_msgs::Marker marker;
+        marker.header = detections3d_msg.header;
+        marker.ns = "clusters";
+        marker.id = i + 1;
+        marker.type = visualization_msgs::Marker::CUBE;
+        marker.action = visualization_msgs::Marker::ADD;
+        marker.pose = det.bbox.center;
+        marker.scale.x = det.bbox.size.x;
+        marker.scale.y = det.bbox.size.y;
+        marker.scale.z = det.bbox.size.z;
+        
+        // 색상: 초록색 (클러스터)
+        marker.color.r = 0.0;
+        marker.color.g = 1.0;
+        marker.color.b = 0.0;
+        marker.color.a = 0.5;
+        
+        marker.lifetime = ros::Duration(duration * 2);  // 2배로 설정하여 끊김 방지
+        marker_array.markers.push_back(marker);
+        
+        // Text marker for cluster ID
+        visualization_msgs::Marker text_marker;
+        text_marker.header = detections3d_msg.header;
+        text_marker.ns = "cluster_ids";
+        text_marker.id = i + 1;
+        text_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+        text_marker.action = visualization_msgs::Marker::ADD;
+        text_marker.pose = det.bbox.center;
+        text_marker.pose.position.z += det.bbox.size.z / 2 + 0.5;  // 위쪽에 표시
+        text_marker.scale.z = 0.5;
+        text_marker.color.r = 1.0;
+        text_marker.color.g = 1.0;
+        text_marker.color.b = 1.0;
+        text_marker.color.a = 1.0;
+        text_marker.text = "Cluster " + std::to_string(i);
+        text_marker.lifetime = ros::Duration(duration * 2);
+        marker_array.markers.push_back(text_marker);
+      }
+    }
+    
+    return marker_array;
+  }
+};
 
-  this->lidar_pub_->publish(*newCloud);
-  this->box3d_pub_->publish(box_array);
-
-  time = now;
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "lidar_cluster_node");
+  LidarClusterNode node;
+  ros::spin();
+  return 0;
 }
-
-void ClusteringNode::timerCallback() {}
