@@ -21,9 +21,9 @@ class EgoCtrlCmd(Base):
         self.header = '#MoraiCtrlCmd$'.encode()
         self.data_lenght = 23
         self.aux_data = (0,0,0)
-        self.ctrl_mode = 0
-        self.gear = 0
-        self.cmd_type = 0
+        self.ctrl_mode = 2
+        self.gear = 4
+        self.cmd_type = 1
         self.velocity = 0
         self.acceleration = 0
         self.accel = 0

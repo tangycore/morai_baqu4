@@ -17,10 +17,25 @@ import rospy
 from morai_msgs.msg import EgoVehicleStatus as EgoVehicleStatusMsg
 
 def copy_into_msg(dst, src):
-    d = src if isinstance(src, dict) else getattr(src, "__dict__", {})
-    for k, v in d.items():
-        if hasattr(dst, k):
-            setattr(dst, k, v)
+    dst.velocity.x = src.vel_x
+    dst.velocity.y = src.vel_y
+    dst.velocity.z = src.vel_z
+    
+    dst.acceleration.x = src.accel_x
+    dst.acceleration.y = src.accel_y
+    dst.acceleration.z = src.accel_z
+    
+    dst.position.x = src.pos_x
+    dst.position.y = src.pos_y
+    dst.position.z = src.pos_z
+    
+    dst.heading = src.yaw
+    
+    # 나머지 flat 필드는 자동 복사
+    for field in ['accel', 'brake', 'steer']:
+        if hasattr(src, field) and hasattr(dst, field):
+            setattr(dst, field, getattr(src, field))
+    
     return dst
 
 def main():
