@@ -6,13 +6,13 @@
   <arg name="cluster_result_topic"  default="cluster_result"/>
   
   <!-- Clustering parameters -->
-  <arg name="cluster_tolerance"     default="0.6"/>      
-  <arg name="min_cluster_size"      default="20"/>       
+  <arg name="cluster_tolerance"     default="0.8"/>      
+  <arg name="min_cluster_size"      default="15"/>       
   <arg name="max_cluster_size"      default="8000"/>
   
   <!-- Filtering parameters (base_link 기준) -->
   <arg name="max_distance"          default="60.0"/>     
-  <arg name="min_x"                 default="3.0"/>
+  <arg name="min_x"                 default="-5.0"/>
   <arg name="min_y"                 default="-5.0"/>    
   <arg name="max_y"                 default="5.0"/>
   <arg name="min_z"                 default="0.0"/>          

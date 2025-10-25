@@ -1,6 +1,5 @@
 /**
  * LiDAR Clustering Node for MORAI Simulator
- * Modified from tracker_with_cloud_node for clustering-only functionality
  */
 
 #include <ros/ros.h>
@@ -103,7 +102,12 @@ public:
     ROS_INFO("Min cluster size: %d", min_cluster_size_);
     ROS_INFO("Max cluster size: %d", max_cluster_size_);
   }
-  
+    bool isEgoVehicle(const pcl::PointXYZ& point)
+  {
+    return (point.x >= -1.0 && point.x <= 4.7 &&
+            point.y >= -1.0 && point.y <= 1.0 &&
+            point.z >= -0.5 && point.z <= 2.0);
+  }
   void lidarCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
   {
     ros::Time current_call_time = ros::Time::now();
@@ -193,9 +197,9 @@ public:
       float const squared_distance = std::pow(point.x, 2) + std::pow(point.y, 2) + std::pow(point.z, 2);
       
       // 거리, x, z 범위로 필터링
-      if (squared_distance > max_squared_distance || 
+      if (isEgoVehicle(point) || squared_distance > max_squared_distance || 
           point.x < min_x_ ||
-          point.y < min_y_ ||      // 추가!
+          point.y < min_y_ ||      
           point.y > max_y_ ||  
           point.z > max_z_ || 
           point.z < min_z_)
