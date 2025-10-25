@@ -6,17 +6,19 @@
   <arg name="cluster_result_topic"  default="cluster_result"/>
   
   <!-- Clustering parameters -->
-  <arg name="cluster_tolerance"     default="0.6"/>      <!-- 차량 간 간격 -->
-  <arg name="min_cluster_size"      default="30"/>       <!-- 먼 거리 차량도 감지 -->
-  <arg name="max_cluster_size"      default="5000"/>
+  <arg name="cluster_tolerance"     default="0.6"/>      
+  <arg name="min_cluster_size"      default="20"/>       
+  <arg name="max_cluster_size"      default="8000"/>
   
   <!-- Filtering parameters (base_link 기준) -->
-  <arg name="max_distance"          default="60.0"/>     <!-- 60m까지 -->
-  <arg name="min_x"                 default="4.0"/>     <!-- 후방 5m (후측방 감지) -->
-  <arg name="max_z"                 default="5.0"/>      <!-- 지면 위 3.5m (트럭 포함) -->
-  <arg name="min_z"                 default="0.0"/>     <!-- 지면 약간 아래 -->
-  <arg name="min_y"                 default="-5.0"/>    <!-- 우측 50m -->
-  <arg name="max_y"                 default="5.0"/>     <!-- 좌측 50m -->
+  <arg name="max_distance"          default="60.0"/>     
+  <arg name="min_x"                 default="3.0"/>
+  <arg name="min_y"                 default="-5.0"/>    
+  <arg name="max_y"                 default="5.0"/>
+  <arg name="min_z"                 default="0.0"/>          
+  <arg name="max_z"                 default="5.0"/>      
+    
+   
 
   <node pkg="lidar_clustering" type="lidar_clustering_node" name="lidar_cluster_node" output="screen">
     <param name="lidar_topic"           value="$(arg lidar_topic)"/>
