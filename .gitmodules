@@ -30,3 +30,15 @@
 	path = src/livox_ros_driver
 	url = https://github.com/Livox-SDK/livox_ros_driver.git
 	branch = master
+[submodule "src/fast_lio"]
+	path = src/fast_lio
+	url = https://github.com/hku-mars/FAST_LIO.git
+	branch = main
+[submodule "src/velodyne"]
+	path = src/velodyne
+	url = https://github.com/ros-drivers/velodyne.git
+	branch = master
+[submodule "src/vision_msgs"]
+	path = src/vision_msgs
+	url = https://github.com/Kukanani/vision_msgs.git
+	branch = noetic-devel
