@@ -12,21 +12,21 @@
 
 ### Multi-Object Tracking
 - **Stable Object ID**: 같은 객체는 프레임 간 동일한 ID 유지
-- **IOU Matching**: Intersection over Union 기반 detection-track 매칭
+- **IOU Matching**: IOU 기반 detection-track 매칭
 - **Lost Track Management**: N 프레임 미감지 시 자동 삭제
-- **Velocity Estimation**: 위치 변화로 속도 자동 계산
+- **Velocity Estimation**: 위치 변화로 속도 계산
 
 ### Two Tracking Options
 1. **Simple Tracker** 
    - IOU 기반 매칭
    - 간단한 위치 차분으로 속도 계산
-   - 빠르고 안정적
+   - 2번보다 빠르다
 
 2. **Kalman+IOU Tracker** 
    - IOU 매칭 + Kalman Filter
-   - 노이즈 robust, 부드러운 속도 추정
+   - 노이즈 대비
    - State: [x, y, vx, vy]
-   - 시뮬레이션 환경이라 노이즈가 적어, 이 방법보다 1번 방법을 더 권장함
+   - 시뮬레이션 환경이라 노이즈가 적어, 1번 방법을 더 권장함
 
 3. **PointPillars + Tracker** 
    - 딥러닝 활용, 추후 고려
@@ -34,7 +34,6 @@
 ### Obstacle Converter (선택)
 - Detection3DArray → Planning 포맷 변환
 - Frenet 좌표 변환 준비
-- Python ROS node로 제공
 
 ## Data Flow
 
@@ -45,7 +44,7 @@
 ### 처리 단계
 1. **Ego Vehicle Filtering**: Bounding box 기반으로 자차 영역 제거
 2. **ROI Filtering**: 거리 및 관심 영역 필터링 (x, y, z, max_distance)
-3. **DBSCAN Clustering**: KD-tree 기반 유클리디안 클러스터링
+3. **DBSCAN Clustering**: KD-tree 기반 밀도기반 클러스터링
 4. **Bounding Box Generation**: 각 클러스터의 3D 박스 추정
 5. **Multi-Object Tracking**: IOU 매칭으로 stable ID 할당 및 속도 추정
 6. **Visualization**: Marker 및 텍스트 생성 (ID 표시)
@@ -67,19 +66,19 @@
 ```
 src/perception/
 ├── src/
-│   ├── clustering.cxx                    # ROS1 노드 본체 (tracking 적용)
-│   └── clustering_with_tracking.cxx      # Tracking 버전 백업
+│   ├── clustering.cxx                    # Clustering Only
+│   └── clustering_with_tracking.cxx      # Clustering + Tracking 
 ├── include/
 │   ├── lidar_clustering/
 │   │   ├── simple_tracker.h              # Simple IOU tracker (기본)
-│   │   └── kalman_iou_tracker.h          # Kalman+IOU tracker (고급)
+│   │   └── kalman_iou_tracker.h          # Kalman + IOU tracker (고급)
 │   ├── clustering_cxx/
-│   │   ├── clustering.hxx                # ROS2 호환 헬퍼
-│   │   └── parameters.hxx                # 파라미터 정의
+│   │   ├── clustering.hxx                
+│   │   └── parameters.hxx                
 │   ├── dbscan_kdtree/
-│   │   ├── DBSCAN_kdtree.h               # KD-tree 기반 DBSCAN
-│   │   ├── DBSCAN_simple.h               # 기본 DBSCAN
-│   │   └── DBSCAN_precomp.h              # Precomputed DBSCAN
+│   │   ├── DBSCAN_kdtree.h               
+│   │   ├── DBSCAN_simple.h               
+│   │   └── DBSCAN_precomp.h              
 │   └── visualization.h                   # 시각화 유틸
 ├── scripts/
 │   └── obstacle_converter.py             # Planning 연동용 변환 노드
@@ -168,18 +167,15 @@ rostopic echo /obstacles
 
 ### 현재: Simple Tracker (기본)
 ```cpp
-// src/clustering.cxx
+// src/clustering_with_tracking.cxx
 #include "lidar_clustering/simple_tracker.h"
 SimpleTracker tracker_;
 ```
 
 ### Kalman+IOU Tracker
 ```cpp
-// src/clustering.cxx 수정
+// src/clustering_with_tracking.cxx 수정
 #include "lidar_clustering/kalman_iou_tracker.h"  // 변경
 KalmanIOUTracker tracker_;                        // 변경
 ```
 
-### 차이점
-- **Simple**: 속도 = 위치 차분
-- **Kalman**: 속도 = Kalman Filter 추정 (smooth)
