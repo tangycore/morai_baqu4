@@ -2,10 +2,11 @@
 2025 대학생 창작 모빌리티 경진대회 시뮬레이션 부문
 
 
-0. 포트번호 설정 (Destination Only)
-   - CollisionData - 9122 
-   - Competition Vehicle Status - 9121
-   - Ego Ctrl Cmd - 9123
+0. 포트번호 설정 
+   - CollisionData - 9122 (Destination) 
+   - Competition Vehicle Status - 9121 (Destination)
+   - Ego Ctrl Cmd - 9123 (Host)
+
 1. MORAI 네트워크 설정  
    - CollisionData, Competition Vehicle Status, LiDAR: UDP
    - IMU, CAM, GPS: ROS
@@ -26,7 +27,7 @@ roslaunch baqu4_tf baqu4_tf.launch
 roslaunch baqu4_udp final_mission.launch || roslaunch baqu4_udp ai_mission.launch
 roslaunch control control.launch
 roslaunch planning_pkg planning.launch
-roslaunch lidar_clustering lidar_clustering.launch
+roslaunch lidar_clustering lidar_clustering_tracking.launch
 ```
 
 5. 차량 제어 시작
