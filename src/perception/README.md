@@ -17,15 +17,19 @@
 - **Velocity Estimation**: 위치 변화로 속도 자동 계산
 
 ### Two Tracking Options
-1. **Simple Tracker** (이거부터 튜닝 해보기)
+1. **Simple Tracker** 
    - IOU 기반 매칭
    - 간단한 위치 차분으로 속도 계산
    - 빠르고 안정적
 
-2. **Kalman+IOU Tracker** (위에꺼 한계가 느껴지면)
+2. **Kalman+IOU Tracker** 
    - IOU 매칭 + Kalman Filter
    - 노이즈 robust, 부드러운 속도 추정
    - State: [x, y, vx, vy]
+   - 시뮬레이션 환경이라 노이즈가 적어, 이 방법보다 1번 방법을 더 권장함
+
+3. **PointPillars + Tracker** 
+   - 딥러닝 활용, 추후 고려
 
 ### Obstacle Converter (선택)
 - Detection3DArray → Planning 포맷 변환
@@ -169,11 +173,12 @@ rostopic echo /obstacles
 SimpleTracker tracker_;
 ```
 
-### 업그레이드: Kalman+IOU Tracker
+### Kalman+IOU Tracker
 ```cpp
 // src/clustering.cxx 수정
 #include "lidar_clustering/kalman_iou_tracker.h"  // 변경
 KalmanIOUTracker tracker_;                        // 변경
+```
 
 ### 차이점
 - **Simple**: 속도 = 위치 차분
