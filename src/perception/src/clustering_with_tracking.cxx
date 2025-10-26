@@ -157,10 +157,10 @@ public:
       createBoundingBox(detections3d_msg, cluster_cloud);
     }
     
-    // ✅ Tracking 업데이트 (ID 할당)
+    //  Tracking 업데이트 (ID 할당)
     tracker_.update(detections3d_msg, cloud_msg->header.stamp.toSec());
     
-    // ✅ Marker에 stable ID 표시
+    //  Marker에 stable ID 표시
     visualization_msgs::MarkerArray marker_array_msg = 
         createMarkerArray(detections3d_msg, callback_interval.toSec());
     
