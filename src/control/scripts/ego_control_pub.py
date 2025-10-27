@@ -53,10 +53,10 @@ class EgoControlPub :
                 curr_ego_state = (self.current_postion.x, self.current_postion.y, self.vehicle_yaw, self.current_speed)
                 steer_angle = self.pure_pursuit.steer_control(curr_ego_state, self.path)
                 self.target_speed = min(10, self.target_speed)
-                print(f"steer: {steer_angle}")
+                # print(f"steer: {steer_angle}")
                 accel, brake, aout = self.pid.accel_control(self.current_speed, self.target_speed, 0.02)
 
-                rospy.loginfo(f"{self.current_speed * 3.6:.2f}, {self.target_speed * 3.6:.2f} | "
+                rospy.loginfo_throttle(1.0, f"{self.current_speed * 3.6:.2f}, {self.target_speed * 3.6:.2f} | "
                             f"steer : {np.rad2deg(steer_angle):.2f}, accel: {accel:.3f}, brake: {brake:.3f}, aout: {aout:.3f}")
 
                 self.ctrl_cmd_msg.accel = accel
