@@ -48,18 +48,18 @@ class VehicleState:
         # self.z = msg.position.z
 
         # # deg → rad 변환
-        # self.heading = math.radians(msg.heading)
+        self.heading = math.radians(msg.heading)
 
         # velocity
-        self.vx = msg.velocity.x
-        self.vy = msg.velocity.y
-        self.vz = msg.velocity.z
-        self.v = math.sqrt(self.vx**2 + self.vy**2 + self.vz**2)
+        self.vx = msg.velocity.x / 3.6
+        self.vy = msg.velocity.y / 3.6
+        self.vz = msg.velocity.z / 3.6
+        self.v = math.sqrt(self.vx**2 + self.vy**2 + self.vz**2) 
 
         # acceleration
-        self.ax = msg.acceleration.x
-        self.ay = msg.acceleration.y
-        self.az = msg.acceleration.z
+        self.ax = msg.acceleration.x / 3.6
+        self.ay = msg.acceleration.y / 3.6
+        self.az = msg.acceleration.z / 3.6
         self.a = math.sqrt(self.ax**2 + self.ay**2 + self.az**2)
 
     def __str__(self):
@@ -342,11 +342,12 @@ class LocalPath:
         
         opt_path = generate_opt_path(fplist)
         self.no_valid_path_cnt = 0
-        target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 6)))
+        target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 10)))
         # while target_v_idx < len(opt_path.s1) - 1 and opt_path.s1[target_v_idx] < self.ego_state.v:
         #     target_v_idx += 1
         # PID 입력은 실제 속도와 동일한 단위(m/s)로 전달
         self.plan_velocity_info_msg.current_speed = self.ego_state.v
+        print(f"curr speed: {self.ego_state.v}")
         curvature = abs(opt_path.kappa[target_v_idx]) if len(opt_path.kappa) > target_v_idx else 0.0
         if curvature > 1e-6:
             curvature_speed_limit = math.sqrt(max(LAT_ACCEL_MAX / curvature, 0.0))
