@@ -44,10 +44,10 @@ def main():
     last_cmd = {"accel": None, "brake": None, "steer_norm": None}
     
     def _on_ctrl(m: CtrlCmd):
-        a = clamp(m.accel,  0.0, 1.0)
-        b = clamp(m.brake,  0.0, 1.0)
+        # a = clamp(m.accel,  0.0, 1.0)
+        # b = clamp(m.brake,  0.0, 1.0)
         
-        # ROS 메시지의 steering은 라디안
+        # # ROS 메시지의 steering은 라디안
         s_rad = getattr(m, "steering", 0.0)
         
         # ========== UDP 규격대로 정규화 ==========
@@ -56,10 +56,10 @@ def main():
         s_norm = s_deg / max_steer_deg  # 정규화
         s_norm = clamp(s_norm, -1.0, 1.0)
 
-        if b > 0.0:
-            a = 0.0  # 브레이크 우선
+        # if b > 0.0:
+        #     a = 0.0  # 브레이크 우선
 
-        last_cmd["accel"], last_cmd["brake"], last_cmd["steer_norm"] = a, b, s_norm
+        last_cmd["accel"], last_cmd["brake"], last_cmd["steer_norm"] = m.accel, m.brake, s_norm
 
     rospy.Subscriber(cmd_topic, CtrlCmd, _on_ctrl, queue_size=10)
 
