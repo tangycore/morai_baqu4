@@ -4,9 +4,9 @@
 - Velodyne 포인트클라우드에서 DBSCAN 기반 객체 클러스터 추출 + Multi-Object Tracking
 - ROI 필터링 후 KD-tree 가속 DBSCAN으로 클러스터링
 - IOU 기반 Data Association으로 안정적인 객체 ID 할당
-- 옵션: Kalman Filter를 통한 노이즈 제거 및 속도 추정
+- 옵션(고급): Kalman Filter를 통한 노이즈 제거 및 속도 추정
 - 결과는 바운딩 박스(stable ID 포함), 마커, 클러스터 포인트로 발행
-- Planning 모듈 연동을 위한 obstacle converter 제공
+- Planning 모듈 연동을 위한 obstacle converter 
 
 ## New Features (Tracking 추가) 
 
@@ -17,16 +17,16 @@
 - **Velocity Estimation**: 위치 변화로 속도 계산
 
 ### Two Tracking Options
-1. **Simple Tracker** 
+1. **Simple Tracker** (기본)
    - IOU 기반 매칭
    - 간단한 위치 차분으로 속도 계산
-   - 2번보다 빠르다
+   - Kalman 방식보다 빠름
 
-2. **Kalman+IOU Tracker** 
+2. **Kalman+IOU Tracker** (고급)
    - IOU 매칭 + Kalman Filter
-   - 노이즈 대비
+   - 노이즈 대비 강화
    - State: [x, y, vx, vy]
-   - 시뮬레이션 환경이라 노이즈가 적어, 1번 방법을 더 권장함
+   - 노이즈 많음 에서 유리
 
 3. **PointPillars + Tracker** 
    - 딥러닝 활용, 추후 고려
@@ -66,24 +66,21 @@
 ```
 src/perception/
 ├── src/
-│   ├── clustering.cxx                    # Clustering Only
-│   └── clustering_with_tracking.cxx      # Clustering + Tracking 
+│   ├── clustering.cxx                    # Clustering Only (트래킹 미포함)
+│   └── clustering_with_tracking.cxx      # Clustering + Tracking (권장)
 ├── include/
 │   ├── lidar_clustering/
+│   │   ├── lidar_cluster_node.h          # 클래스 선언 및 파라미터 구조체
 │   │   ├── simple_tracker.h              # Simple IOU tracker (기본)
-│   │   └── kalman_iou_tracker.h          # Kalman + IOU tracker (고급)
-│   ├── clustering_cxx/
-│   │   ├── clustering.hxx                
-│   │   └── parameters.hxx                
-│   ├── dbscan_kdtree/
-│   │   ├── DBSCAN_kdtree.h               
-│   │   ├── DBSCAN_simple.h               
-│   │   └── DBSCAN_precomp.h              
-│   └── visualization.h                   # 시각화 유틸
+│   │   └── kalman_iou_tracker.h          # Kalman + IOU tracker (고급))
+│   └── dbscan_kdtree/
+│       ├── DBSCAN_kdtree.h               # KD-tree 기반 DBSCAN
+│       ├── DBSCAN_simple.h               # 기본 DBSCAN
+│       └── DBSCAN_precomp.h              # 최적화 DBSCAN
 ├── scripts/
 │   └── obstacle_converter.py             # Planning 연동용 변환 노드
 ├── launch/
-│   ├── lidar_clustering.launch           # 기본 런치 파일
+│   ├── lidar_clustering.launch           # DBSCAN withou Tracking
 │   └── lidar_clustering_tracking.launch  # Tracking 버전 런치
 ├── CMakeLists.txt
 ├── package.xml
@@ -91,10 +88,21 @@ src/perception/
 ```
 
 ### 주요 구성
-- **Ego Vehicle Filtering**: `isEgoVehicle()` 함수로 자차 포인트 제거
+
+#### Core Components
+- **LidarClusterNode** (`lidar_cluster_node.h`): 메인 클래스 선언
+  - `ClusteringParams`: 클러스터링 파라미터 구조체
+  - `FilteringParams`: ROI 필터링 파라미터 구조체
+  - `EgoVehicleBounds`: 자차 영역 정의 구조체
 - **DBSCAN Clustering**: KD-tree 탐색으로 이웃 검색 가속
 - **Multi-Object Tracking**: IOU 기반 detection-track 매칭
 - **Kalman Filter**: 옵션으로 노이즈 제거 및 속도 smoothing
+
+#### Implementation
+- **Ego Vehicle Filtering**: `EgoVehicleBounds::contains()` inline 함수로 자차 포인트 제거
+- **Parameter Loading**: `loadParameters()` 함수로 ROS 파라미터 로드
+- **Bounding Box**: PCA 기반 회전 박스 추정
+- **Visualization**: 3D 박스 + ID 텍스트 마커 생성
 
 ## Topics
 
@@ -128,19 +136,30 @@ src/perception/
   - 기본값: `cluster_result`
 
 ### 클러스터링
-- `cluster_tolerance` (double): DBSCAN epsilon [m]
+- `cluster_tolerance` (float): DBSCAN epsilon [m]
 
 - `min_cluster_size` (int): 최소 포인트 수
 
 - `max_cluster_size` (int): 최대 포인트 수
 
-
 ### ROI 필터링 (output_frame 기준)
-- `max_distance` (double): 원거리 컷오프 [m]
-- `min_x` (double): x축 하한 [m]
-  - **주의**: Ego vehicle filtering으로 자차는 별도 제거됨
-- `min_y`, `max_y` (double): y축 범위 [m]
-- `min_z`, `max_z` (double): z축 범위 [m]
+- `max_distance` (float): 원거리 컷오프 [m]
+
+- `min_x` (float): x축 하한 [m]
+  - Ego vehicle filtering으로 자차는 별도 제거됨
+
+- `min_y`, `max_y` (float): y축 범위 [m]
+
+- `min_z`, `max_z` (float): z축 범위 [m]
+
+### Ego Vehicle Bounds (선택적)
+자차 영역을 커스터마이즈하려면 launch 파일에 추가:
+- `ego_min_x`, `ego_max_x` (float): 자차 x 범위 [m]
+  - 기본값: [-1.0, 4.7]
+- `ego_min_y`, `ego_max_y` (float): 자차 y 범위 [m]
+  - 기본값: [-1.0, 1.0]
+- `ego_min_z`, `ego_max_z` (float): 자차 z 범위 [m]
+  - 기본값: [-0.5, 2.0]
 
 ### Tracking (코드 내부 파라미터)
 
@@ -150,9 +169,21 @@ src/perception/
 - `history_size_`: 5 (속도 계산용 히스토리)
 
 **Kalman Tracker** (`kalman_iou_tracker.h`):
-- Process Noise: 1e-2 (동역학 모델 불확실성 - 추정값)
-- Measurement Noise: 1e-1 (LiDAR 측정 노이즈 - 추정값)
+- Process Noise: 1e-2 (동역학 모델 - 불확실)
+- Measurement Noise: 1e-1 (LiDAR 측정 노이즈 - 불확실)
+- State: [x, y, vx, vy]
+- Measurement: [x, y]
 
+## Usage
+
+### 기본 실행 (Simple Tracker)
+```bash
+# Tracking 포함 버전 (권장)
+roslaunch lidar_clustering lidar_clustering_tracking.launch
+
+# Tracking 미포함 버전
+roslaunch lidar_clustering lidar_clustering.launch
+```
 
 ### Planning 연동 
 ```bash
@@ -163,6 +194,7 @@ rosrun lidar_clustering obstacle_converter.py
 rostopic echo /obstacles
 ```
 
+
 ## Advanced: Switching to Kalman Filter
 
 ### 현재: Simple Tracker (기본)
@@ -172,10 +204,15 @@ rostopic echo /obstacles
 SimpleTracker tracker_;
 ```
 
-### Kalman+IOU Tracker
+### 변경 시: Kalman+IOU Tracker
+1. **코드 수정** (`src/clustering_with_tracking.cxx`):
 ```cpp
-// src/clustering_with_tracking.cxx 수정
-#include "lidar_clustering/kalman_iou_tracker.h"  // 변경
-KalmanIOUTracker tracker_;                        // 변경
+// 헤더 변경
+#include "lidar_clustering/kalman_iou_tracker.h"
+
+// 멤버 변수 변경 (lidar_cluster_node.h에서)
+KalmanIOUTracker tracker_;
 ```
 
+
+.
