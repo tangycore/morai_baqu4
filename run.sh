@@ -27,7 +27,6 @@ launch_bg baqu4_tf baqu4_tf.launch
 launch_bg baqu4_udp final_mission.launch
 launch_bg control control.launch
 launch_bg planning_pkg planning.launch
-launch_bg lidar_clustering lidar_clustering_tracking.launch
 
 # rosbridge는 별도로:
 # roslaunch --screen rosbridge_server rosbridge_websocket.launch

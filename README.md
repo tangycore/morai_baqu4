@@ -40,7 +40,7 @@ cd scripts && python3 ego_control_pub.py
 
 터미널 1
 ```bash
-roslaunch rosbridge_server rosbridge_websocket.launc
+roslaunch rosbridge_server rosbridge_websocket.launch
 ```
 
 터미널 2 ( 네트워크, 센서 연결 후 )
@@ -48,7 +48,12 @@ roslaunch rosbridge_server rosbridge_websocket.launc
 ./run.sh
 ```
 
-터미널 3
+터미널 3 
+```bash
+roslaunch lidar_clustering lidar_clustering_tracking.launch
+```
+
+터미널 4
 ```bash
 roscd control
 cd scripts && python3 ego_control_pub.py
