@@ -56,7 +56,7 @@ class EgoControlPub :
                 # print(f"steer: {steer_angle}")
                 accel, brake, aout = self.pid.accel_control(self.current_speed, self.target_speed, 0.02)
 
-                rospy.loginfo_throttle(1.0, f"{self.current_speed * 3.6:.2f}, {self.target_speed * 3.6:.2f} | "
+                rospy.loginfo(f"{self.current_speed * 3.6:.2f}, {self.target_speed * 3.6:.2f} | "
                             f"steer : {np.rad2deg(steer_angle):.2f}, accel: {accel:.3f}, brake: {brake:.3f}, aout: {aout:.3f}")
 
                 self.ctrl_cmd_msg.accel = accel

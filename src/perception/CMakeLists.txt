@@ -67,7 +67,7 @@ include_directories(
 
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME}_node 
-  src/clustering_with_tracking.cxx
+  src/clustering.cxx
 )
 
 ## Add cmake target dependencies of the executable

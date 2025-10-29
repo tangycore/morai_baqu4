@@ -4,7 +4,9 @@
 
 0. 포트번호 설정 
    - CollisionData - 9122 (Destination) 
+	- 로컬호스트 개발시 호스트 포트 : 9091
    - Competition Vehicle Status - 9121 (Destination)
+	- localhost 개발시 호스트 포트: 9092
    - Ego Ctrl Cmd - 9123 (Host)
 
 1. MORAI 네트워크 설정  

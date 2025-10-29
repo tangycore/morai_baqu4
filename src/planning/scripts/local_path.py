@@ -87,6 +87,7 @@ class LocalPath:
         rospy.Subscriber("/morai/competition_status", EgoVehicleStatus, self.status_callback)
 
         self.ego_state = VehicleState()
+        self.is_status = False
         self.global_path = None
         self.refer_xlist = []
         self.refer_ylist = []
@@ -299,7 +300,7 @@ class LocalPath:
 
 
     def generate_local_path(self):
-        if self.ego_state is None or self.global_path is None:
+        if not self.is_status or self.ego_state is None or self.global_path is None:
             rospy.logerr("Check ego_state and global_path.")
             return
         if self.segment_xlist.size < 2:

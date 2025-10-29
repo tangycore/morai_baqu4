@@ -4,7 +4,7 @@
   <arg name="ctrl_port"        default="9123"/>
   <arg name="collision_port"   default="9122"/>
   <arg name="status_port"      default="9121"/>
-  <arg name="rate_hz"          default="60"/>
+  <arg name="rate_hz"          default="50"/>
 
   <env name="PYTHONPATH" value="$(find baqu4_udp)/vendor/morai_udp:$(optenv PYTHONPATH)"/>
 

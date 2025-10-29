@@ -1,7 +1,7 @@
 import socket
 import ctypes
-import multiprocessing
 import threading
+import queue
 
 class Receiver :
     def __init__(self, ip, port, data_type):
@@ -15,9 +15,9 @@ class Receiver :
 
         self.data_size = ctypes.sizeof(data_type)
 
-        self.parsed_data_queue = multiprocessing.Queue()
+        self.parsed_data_queue = queue.Queue()
         threading.Thread(target=self.data_parsing, daemon=True).start()
-        multiprocessing.Process(target=self.recv_udp_data, daemon=True).start()
+        threading.Thread(target=self.recv_udp_data, daemon=True).start()
 
         
 
@@ -25,7 +25,7 @@ class Receiver :
         while True :
             raw_data, _ = self.socket.recvfrom(self.data_size)            
             ctypes.memmove(ctypes.addressof(self.data_type), raw_data, self.data_size)            
-            try:#한번에 여러 데이터가 들어오는 protocol을 위해 별도의 parsing(CAM, GPS 등등..)
+            try:
                 self.data_type.parsing()
             except Exception as e :
                 pass            
