@@ -1,16 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import rospy
 import sys
 from geometry_msgs.msg import Point32, PoseStamped
 from nav_msgs.msg import Odometry, Path
 from morai_msgs.msg import EgoVehicleStatus
+from vision_msgs.msg import Detection3DArray  # ★ 추가
 import tf
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import numpy as np
 
 from planning_pkg.frenet import world2frenet, frenet2world, find_closest_waypoint
-from planning_pkg.planner import generate_opt_path, \
-                                generate_velocity_keeping_trajectories_in_frenet, \
-                                frenet_paths_to_world, check_valid_path
+from planning_pkg.planner import (
+    generate_opt_path,
+    generate_velocity_keeping_trajectories_in_frenet,
+    frenet_paths_to_world, 
+    check_valid_path
+)
 from planning_pkg.config import (
     DESIRED_LAT_POS,
     FINAL_DESIRED_SPEED,
@@ -27,52 +34,41 @@ class VehicleState:
         self.x = 0.0
         self.y = 0.0
         self.z = 0.0
-
-        self.heading = 0.0  # rad 단위로 변환 저장
-
+        self.heading = 0.0
         self.vx = 0.0
         self.vy = 0.0
         self.vz = 0.0
-        self.v = 0.0   # speed magnitude
-
- 
+        self.v = 0.0
         self.ax = 0.0
         self.ay = 0.0
         self.az = 0.0
-        self.a = 0.0   # magnitude
-
+        self.a = 0.0
 
     def update_from_msg(self, msg):
-        # self.x = msg.position.x
-        # self.y = msg.position.y
-        # self.z = msg.position.z
-
-        # # deg → rad 변환
         self.heading = math.radians(msg.heading)
-
-        # velocity
         self.vx = msg.velocity.x / 3.6
         self.vy = msg.velocity.y / 3.6
         self.vz = msg.velocity.z / 3.6
-        self.v = math.sqrt(self.vx**2 + self.vy**2 + self.vz**2) 
-
-        # acceleration
+        self.v = math.sqrt(self.vx**2 + self.vy**2 + self.vz**2)
         self.ax = msg.acceleration.x / 3.6
         self.ay = msg.acceleration.y / 3.6
         self.az = msg.acceleration.z / 3.6
         self.a = math.sqrt(self.ax**2 + self.ay**2 + self.az**2)
 
     def __str__(self):
-        return f"(x={self.x:.3f}, y={self.y:.3f}, heading={math.degrees(self.heading):.2f}°, v={self.v:.3f} m/s, a={self.a:.3f} m/s²)"
+        return f"(x={self.x:.3f}, y={self.y:.3f}, heading={math.degrees(self.heading):.2f}°, v={self.v:.3f} m/s)"
 
 class LocalPath:
     def __init__(self):
         rospy.init_node('local_path', anonymous=True)
+        
+        # Publishers
         self.opt_local_path_pub = rospy.Publisher('/opt_path', Path, queue_size=1)
         self.valid_local_path_pub = rospy.Publisher('/valid_local_path', Path, queue_size=1)
         self.frenet_path_pub = rospy.Publisher('/all_frenet_path', Path, queue_size=1)
         self.plan_velocity_info_pub = rospy.Publisher('/plan_velocity_info', PlanVelocityInfo, queue_size=1)
 
+        # Path messages
         self.opt_local_path_msg = Path()
         self.opt_local_path_msg.header.frame_id = '/map'
         self.valid_local_path_msg = Path()
@@ -81,14 +77,18 @@ class LocalPath:
         self.frenet_path_msg.header.frame_id = '/map'
         self.plan_velocity_info_msg = PlanVelocityInfo()
         
-
+        # Subscribers
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
         rospy.Subscriber("/global_path", Path, self.global_path_callback)
         rospy.Subscriber("/morai/competition_status", EgoVehicleStatus, self.status_callback)
+        rospy.Subscriber("/cluster_result", Detection3DArray, self.cluster_callback)  # ★ 추가
 
+        # State variables
         self.ego_state = VehicleState()
-        self.is_status = False
         self.global_path = None
+        self.obstacles = []  # ★ 추가
+        
+        # Reference line
         self.refer_xlist = []
         self.refer_ylist = []
         self.refer_slist = []
@@ -104,30 +104,80 @@ class LocalPath:
         self.segment_ylist = np.array([])
         self.segment_slist = np.array([])
         self.segment_refresh_margin_points = 10
+        
+        # Planning state
         self.prev_opt_target_speed = 0.0
         self.s0, self.s1, self.s2 = 0, 0, 0
         self.d0, self.d1, self.d2 = 0, 0, 0
-        self.setup_reference_line() # init start state
         self.no_valid_path_cnt = 0
+        
+        # Configuration
+        self.ego_filter_radius = 2.0  # ★ Ego vehicle 필터링 반경
+        
+        self.setup_reference_line()
 
     def status_callback(self, msg):
         self.is_status = True
         self.ego_state.update_from_msg(msg)
 
     def odom_callback(self, msg):
-       odom_quaternion=(msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,msg.pose.pose.orientation.z,msg.pose.pose.orientation.w)
-       _, _, self.ego_state.heading = euler_from_quaternion(odom_quaternion)
-       self.ego_state.x = msg.pose.pose.position.x
-       self.ego_state.y = msg.pose.pose.position.y
+        odom_quaternion = (
+            msg.pose.pose.orientation.x,
+            msg.pose.pose.orientation.y,
+            msg.pose.pose.orientation.z,
+            msg.pose.pose.orientation.w
+        )
+        _, _, self.ego_state.heading = euler_from_quaternion(odom_quaternion)
+        self.ego_state.x = msg.pose.pose.position.x
+        self.ego_state.y = msg.pose.pose.position.y
 
     def global_path_callback(self, msg):
-        if self.global_path == None:
+        if self.global_path is None:
             self.global_path = msg
+
+    # ★ 새로운 콜백: 장애물 수신
+    def cluster_callback(self, msg):
+        """
+        vision_msgs::Detection3DArray를 수신하여 planning 형식으로 변환
+        """
+        self.obstacles = []
+        
+        for detection in msg.detections:
+            # 위치 추출 (base_link 기준)
+            x = detection.bbox.center.position.x
+            y = detection.bbox.center.position.y
+            
+            # 크기 추출
+            width = detection.bbox.size.y   # 좌우 폭
+            height = detection.bbox.size.x  # 전후 길이
+            
+            # Ego vehicle 필터링 (2m 이내 제외)
+            dist = np.hypot(x, y)
+            if dist <= self.ego_filter_radius:
+                continue
+            
+            # Planning 모듈이 요구하는 형식으로 변환
+            obstacle = {
+                'type': 'unknown',  # vehicle이 아닌 타입
+                'object': type('obj', (), {
+                    'x': x,
+                    'y': y,
+                    'width': width,
+                    'height': height
+                })()
+            }
+            
+            self.obstacles.append(obstacle)
+        
+        rospy.loginfo_throttle(2.0, 
+            f"[LocalPath] Received {len(self.obstacles)} obstacles "
+            f"(filtered from {len(msg.detections)} detections)")
 
     def setup_reference_line(self):
         while not self.global_path:
             rospy.logdebug_once("Waiting global path")
         rospy.loginfo("find global path")
+        
         total = len(self.global_path.poses)
         for i, pose in enumerate(self.global_path.poses):
             self.refer_xlist.append(pose.pose.position.x)
@@ -148,7 +198,7 @@ class LocalPath:
         if diffs.size > 0:
             sample_count = min(200, diffs.size)
             self.path_resolution = float(np.mean(diffs[:sample_count]))
-        # 전역 경로를 일정 길이 세그먼트로 나누기 위한 포인트 수 계산
+        
         self.ref_window_points = int(np.ceil(self.ref_window_m / max(self.path_resolution, 1e-3)))
         self.ref_backward_points = int(np.ceil(self.ref_backward_m / max(self.path_resolution, 1e-3)))
         self.segment_refresh_margin_points = max(10, int(0.1 * (self.ref_window_points + self.ref_backward_points)))
@@ -175,15 +225,16 @@ class LocalPath:
         self.update_reference_segment(0)
         self.closest_wp_idx = 0
         self.s0, self.d0 = world2frenet(
-                    self.ego_state.x, self.ego_state.y, 
-                    self.segment_xlist, self.segment_ylist,
-                    self.segment_slist[0] if self.segment_slist.size else 0.0)
+            self.ego_state.x, self.ego_state.y, 
+            self.segment_xlist, self.segment_ylist,
+            self.segment_slist[0] if self.segment_slist.size else 0.0
+        )
         rospy.loginfo("All setup done!")
 
     def update_reference_segment(self, center_idx):
         if self.refer_xlist.size == 0:
             return
-        # 최근 최근접 wp를 중심으로 전·후방 세그먼트를 갱신
+        
         total_points = self.ref_window_points + self.ref_backward_points
         start_idx = max(center_idx - self.ref_backward_points, 0)
         end_idx = start_idx + total_points
@@ -237,7 +288,6 @@ class LocalPath:
         self.closest_wp_idx = global_idx
 
         if (self.segment_end_idx - global_idx) < self.segment_refresh_margin_points:
-            # 세그먼트 끝으로 가까워지면 다음 구간을 미리 준비
             self.update_reference_segment(global_idx)
             local_idx = find_closest_waypoint(
                 self.ego_state.x,
@@ -248,7 +298,6 @@ class LocalPath:
             global_idx = self.segment_start_idx + local_idx
             self.closest_wp_idx = global_idx
 
-        # 세그먼트의 시작 s 값을 기준점으로 넘겨 연속적인 frenet s 유지
         initial_s = self.segment_slist[0] if self.segment_slist.size else 0.0
         self.s0, self.d0 = world2frenet(
             self.ego_state.x,
@@ -296,24 +345,35 @@ class LocalPath:
         self.s2 = ax * math.cos(delta_theta) + ay * math.sin(delta_theta) + self.s1 * self.d1 * kappa_r
         self.d2 = -ax * math.sin(delta_theta) + ay * math.cos(delta_theta) - self.s1**2 * kappa_r
 
-        rospy.loginfo(f"[LocalPath] Frenet updated: s0={self.s0:.2f}, s1={self.s1:.2f}, s2={self.s2:.2f}, d0={self.d0:.2f}, d1={self.d1:.2f}, d2={self.d2:.2f}")
-
+        rospy.loginfo(f"[LocalPath] Frenet updated: s0={self.s0:.2f}, s1={self.s1:.2f}, d0={self.d0:.2f}")
 
     def generate_local_path(self):
-        if not self.is_status or self.ego_state is None or self.global_path is None:
+        if self.ego_state is None or self.global_path is None:
             rospy.logerr("Check ego_state and global_path.")
             return
         if self.segment_xlist.size < 2:
             rospy.logwarn("[LocalPath] Reference segment not ready for world conversion.")
             return
+        
         rospy.loginfo(f"ego status: {self.ego_state.x}, {self.ego_state.y} | frenet: {self.s0}, {self.d0}")
-        fplist = generate_velocity_keeping_trajectories_in_frenet((self.d0, self.d1, self.d2, 0, 0), 
-                                                                  (self.s0, self.s1, self.s2, 0), 
-                                                                  DESIRED_LAT_POS, 
-                                                                  FINAL_DESIRED_SPEED)
-        fplist = frenet_paths_to_world(fplist, self.segment_xlist, self.segment_ylist, self.segment_slist)
+        
+        # 궤적 생성
+        fplist = generate_velocity_keeping_trajectories_in_frenet(
+            (self.d0, self.d1, self.d2, 0, 0), 
+            (self.s0, self.s1, self.s2, 0), 
+            DESIRED_LAT_POS, 
+            FINAL_DESIRED_SPEED
+        )
+        
+        # World 좌표로 변환
+        fplist = frenet_paths_to_world(
+            fplist, 
+            self.segment_xlist, 
+            self.segment_ylist, 
+            self.segment_slist
+        )
 
-        # frenet path 시각화 용
+        # Frenet path 시각화
         frenet_paths = Path()
         frenet_paths.header.frame_id = "map"
         frenet_paths.header.stamp = rospy.Time.now()
@@ -322,7 +382,8 @@ class LocalPath:
             frenet_paths.poses.extend(frenet_path.poses)
         self.frenet_path_msg = frenet_paths
 
-        fplist = check_valid_path(fplist, None) # None <= obs 들어가야함.
+        # ★ 장애물을 고려한 유효성 검사
+        fplist = check_valid_path(fplist, self.obstacles)
 
         if not fplist:
             rospy.logwarn("No valid path.")
@@ -332,7 +393,7 @@ class LocalPath:
             self.plan_velocity_info_msg.timestamp = rospy.Time.now().to_sec()
             return
         
-        # valid path 시각화 용
+        # Valid path 시각화
         valid_paths = Path()
         valid_paths.header.frame_id = "map"
         valid_paths.header.stamp = rospy.Time.now()
@@ -341,26 +402,27 @@ class LocalPath:
             valid_paths.poses.extend(valid_path.poses)
         self.valid_local_path_msg = valid_paths
         
+        # 최적 경로 선택
         opt_path = generate_opt_path(fplist)
         self.no_valid_path_cnt = 0
+        
+        # 목표 속도 계산
         target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 10)))
-        # while target_v_idx < len(opt_path.s1) - 1 and opt_path.s1[target_v_idx] < self.ego_state.v:
-        #     target_v_idx += 1
-        # PID 입력은 실제 속도와 동일한 단위(m/s)로 전달
+        
         self.plan_velocity_info_msg.current_speed = self.ego_state.v
-        print(f"curr speed: {self.ego_state.v}")
+        
         curvature = abs(opt_path.kappa[target_v_idx]) if len(opt_path.kappa) > target_v_idx else 0.0
         if curvature > 1e-6:
             curvature_speed_limit = math.sqrt(max(LAT_ACCEL_MAX / curvature, 0.0))
         else:
             curvature_speed_limit = FINAL_DESIRED_SPEED
-        # 곡률 기반 타겟 속도 제한
+        
         target_speed = min(opt_path.s1[target_v_idx], curvature_speed_limit, FINAL_DESIRED_SPEED)
         self.plan_velocity_info_msg.target_speed = max(target_speed, 0.0)
         self.plan_velocity_info_msg.timestamp = rospy.Time.now().to_sec()
+        
         self.opt_local_path_msg = self.frenet_path_to_msg(opt_path)
         self.prev_opt_target_speed = self.plan_velocity_info_msg.target_speed
-        
         
     def publish_path(self):
         rate = rospy.Rate(10)  # 10Hz

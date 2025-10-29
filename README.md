@@ -3,10 +3,8 @@
 
 
 0. 포트번호 설정 
-   - CollisionData - 9122 (Destination) 
-	- 로컬호스트 개발시 호스트 포트 : 9091
-   - Competition Vehicle Status - 9121 (Destination)
-	- localhost 개발시 호스트 포트: 9092
+   - Ego(Competition) Vehicle Status - host 9091 dst 9121 (local) 
+   - CollisionData - host 9092 dst 9122 (local) 
    - Ego Ctrl Cmd - 9123 (Host)
 
 1. MORAI 네트워크 설정  
@@ -29,7 +27,7 @@ roslaunch baqu4_tf baqu4_tf.launch
 roslaunch baqu4_udp final_mission.launch || roslaunch baqu4_udp ai_mission.launch
 roslaunch control control.launch
 roslaunch planning_pkg planning.launch
-roslaunch lidar_clustering lidar_clustering_tracking.launch
+roslaunch lidar_clustering lidar_clustering.launch
 ```
 
 5. 차량 제어 시작
@@ -52,14 +50,21 @@ roslaunch rosbridge_server rosbridge_websocket.launch
 
 터미널 3 
 ```bash
-roslaunch lidar_clustering lidar_clustering_tracking.launch
+roslaunch lidar_clustering lidar_clustering.launch
 ```
 
 터미널 4
 ```bash
+roscd planning_pkg
+cd scripts && python3 obstacle_debugger.py
+```
+
+터미널 5
+```bash
 roscd control
 cd scripts && python3 ego_control_pub.py
 ```
+
 
 
 push after git sync
