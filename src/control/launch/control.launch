@@ -1,7 +1,7 @@
 <launch>
   <!-- 1) odom: /gps + /imu → /odom -->
-  <node pkg="control" type="odom.py" name="odom" output="screen" respawn="true">
-  </node>
+  <!-- <node pkg="control" type="odom.py" name="odom" output="screen" respawn="true"> -->
+  <!-- </node> -->
 
   <!-- 1-2) 동적 TF: odom -> base_link -->
   <node pkg="control" type="odom_tf_pub.py" name="odom_tf_pub" output="screen" respawn="true">
