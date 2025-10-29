@@ -36,29 +36,36 @@ class GPSIMUParser:
         self.is_vx = False
         
         self.proj_UTM = Proj(proj='utm', zone=52, ellps='WGS84', preserve_units=False)
+        self.last_imu_time = None
         
         self.odom_msg = Odometry()
         self.odom_msg.header.frame_id = 'odom'
         self.odom_msg.child_frame_id = 'base_link'
         
         # 고정 주파수 및 dt
-        self.ODOM_HZ = 50.0
+        self.ODOM_HZ = 30.0
         self.dt = 1.0 / self.ODOM_HZ  # 0.02초
+        self.last_update_time = None
         
         rate = rospy.Rate(self.ODOM_HZ)  # 50Hz
         
         while not rospy.is_shutdown():
             current_time = rospy.Time.now()
+            if self.last_update_time is None:
+                dt = self.dt
+            else:
+                dt = (current_time - self.last_update_time).to_sec()
+                dt = np.clip(dt, 0.0, 0.1)  # overly large gap 보호
             
             if self.is_imu:
                 if self.gps_is_valid:
                     #  GPS 정상 (값이 0이 아님): GPS 기반 위치
                     self.update_from_gps()
-                    rospy.loginfo_throttle(5.0, "[Odom] GPS OK")
+                    rospy.loginfo_throttle(1.0, "[Odom] GPS OK")
                     
                 elif self.gps_ever_received and self.is_vx:
                     #  GPS Blackout (값이 0): Dead Reckoning
-                    self.dead_reckoning(self.dt)
+                    self.dead_reckoning(dt)
                     rospy.logwarn_throttle(1.0, 
                         f"[Odom] GPS BLACKOUT (lat={self.lat}, lon={self.lon})! "
                         f"DR (v={self.vx:.2f}, δ={np.rad2deg(self.delta):.1f}°)")
@@ -68,6 +75,7 @@ class GPSIMUParser:
                 
                 # Odometry 발행
                 self.publish_odom(current_time)
+                self.last_update_time = current_time
             
             rate.sleep()
     
@@ -76,13 +84,15 @@ class GPSIMUParser:
         GPS 메시지 수신
         음영 구역에서는 lat=0, lon=0으로 들어옴!
         """
-        self.lat = gps_msg.latitude
-        self.lon = gps_msg.longitude
-        self.e_o = gps_msg.eastOffset
-        self.n_o = gps_msg.northOffset
-        
-        #  GPS 유효성 체크: lat, lon이 둘 다 0이면 무효
-        if self.lat != 0.0 or self.lon != 0.0:
+        lat = gps_msg.latitude
+        lon = gps_msg.longitude
+        valid_fix = not (np.isclose(lat, 0.0) and np.isclose(lon, 0.0))
+
+        if valid_fix:
+            self.lat = lat
+            self.lon = lon
+            self.e_o = gps_msg.eastOffset
+            self.n_o = gps_msg.northOffset
             self.gps_is_valid = True
             self.gps_ever_received = True
         else:
@@ -97,25 +107,44 @@ class GPSIMUParser:
     
     def imu_callback(self, data):
         """IMU (Yaw)"""
-        if data.orientation.w != 0:
-            _, _, self.psi = euler_from_quaternion([
-                data.orientation.x, 
-                data.orientation.y,
-                data.orientation.z, 
-                data.orientation.w
-            ])
-            self.is_imu = True
-            
-            # Orientation 저장
-            self.odom_msg.pose.pose.orientation.x = data.orientation.x
-            self.odom_msg.pose.pose.orientation.y = data.orientation.y
-            self.odom_msg.pose.pose.orientation.z = data.orientation.z
-            self.odom_msg.pose.pose.orientation.w = data.orientation.w
+        stamp = data.header.stamp if data.header.stamp != rospy.Time() else rospy.Time.now()
+        if self.last_imu_time is None:
+            dt = 0.0
+        else:
+            dt = (stamp - self.last_imu_time).to_sec()
+            dt = np.clip(dt, 0.0, 0.05)
+        self.last_imu_time = stamp
+
+        yaw_rate = data.angular_velocity.z
+        if np.isfinite(yaw_rate):
+            self.psi = self.normalize_angle(self.psi + yaw_rate * dt)
+
+        q_in = [
+            data.orientation.x,
+            data.orientation.y,
+            data.orientation.z,
+            data.orientation.w
+        ]
+        quat_norm = np.linalg.norm(q_in)
+        if quat_norm > 1e-3:
+            _, _, yaw_meas = euler_from_quaternion(q_in)
+            yaw_error = self.normalize_angle(yaw_meas - self.psi)
+            self.psi = self.normalize_angle(self.psi + 0.05 * yaw_error)
+
+        q_out = quaternion_from_euler(0, 0, self.psi)
+        self.odom_msg.pose.pose.orientation.x = q_out[0]
+        self.odom_msg.pose.pose.orientation.y = q_out[1]
+        self.odom_msg.pose.pose.orientation.z = q_out[2]
+        self.odom_msg.pose.pose.orientation.w = q_out[3]
+
+        self.is_imu = True
     
     def status_callback(self, msg):
         """차량 속도"""
-        self.vx = np.hypot(msg.velocity.x, msg.velocity.y)
-        self.is_vx = True
+        speed_kph = np.sqrt(msg.velocity.x**2 + msg.velocity.y**2 + msg.velocity.z**2)
+        if np.isfinite(speed_kph):
+            self.vx = speed_kph * (1000.0 / 3600.0)  # kph -> m/s
+            self.is_vx = True
     
     def ctrl_callback(self, msg):
         """조향각"""
@@ -128,22 +157,10 @@ class GPSIMUParser:
         y_k+1 = y_k + Vx·sin(ψ + δ)·Δt
         ψ_k+1 = ψ_k + (Vx/L)·tan(δ)·Δt
         """
-        # 위치 업데이트
-        heading = self.psi + self.delta
+        # IMU yaw(ψ)를 그대로 사용해 위치 적분 (조향각은 차량 방향이 아님)
+        heading = self.psi
         self.x += self.vx * np.cos(heading) * dt
         self.y += self.vx * np.sin(heading) * dt
-        
-        # Yaw 업데이트
-        if abs(self.delta) > 1e-4:
-            self.psi += (self.vx / self.L) * np.tan(self.delta) * dt
-            self.psi = np.arctan2(np.sin(self.psi), np.cos(self.psi))  # 정규화
-            
-            # Orientation 업데이트
-            q = quaternion_from_euler(0, 0, self.psi)
-            self.odom_msg.pose.pose.orientation.x = q[0]
-            self.odom_msg.pose.pose.orientation.y = q[1]
-            self.odom_msg.pose.pose.orientation.z = q[2]
-            self.odom_msg.pose.pose.orientation.w = q[3]
     
     def publish_odom(self, stamp):
         """Odometry 발행"""
@@ -152,6 +169,10 @@ class GPSIMUParser:
         self.odom_msg.pose.pose.position.y = self.y
         self.odom_msg.pose.pose.position.z = 0.0
         self.odom_pub.publish(self.odom_msg)
+
+    @staticmethod
+    def normalize_angle(angle):
+        return np.arctan2(np.sin(angle), np.cos(angle))
 
 if __name__ == '__main__':
     try:
