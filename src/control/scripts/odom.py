@@ -23,7 +23,7 @@ class GPSIMUParser:
         # States
         self.x, self.y, self.psi = 0.0, 0.0, 0.0
         self.vx, self.delta = 0.0, 0.0
-        self.beta = 0.0  # ✅ sideslip angle (EgoVehicleStatus에서 받음)
+        self.beta = 0.0  # sideslip angle (EgoVehicleStatus에서 받음)
         
         # Vehicle parameters
         self.L = 2.5  # wheelbase
@@ -39,7 +39,7 @@ class GPSIMUParser:
         # Flags
         self.is_imu = False
         self.is_vx = False
-        self.is_beta = False  # ✅ sideslip 수신 여부
+        self.is_beta = False  # sideslip 수신 여부
         
         self.proj_UTM = Proj(proj='utm', zone=52, ellps='WGS84', preserve_units=False)
         
@@ -159,12 +159,10 @@ class GPSIMUParser:
     def dead_reckoning(self, dt):
         """
         GPS Blackout 전용: EgoVehicleStatus의 sideslip angle 직접 사용
-        
-        교수님 수식:
         - Ẋ = v·cos(ψ + β)
         - Ẏ = v·sin(ψ + β)
         - ψ̇ = (v·cos(β))/(ℓf + ℓr) · tan(δ)
-        - β는 EgoVehicleStatus에서 받음 ✅
+        - β는 EgoVehicleStatus에서 받음 
         """
         
         # 1. Sideslip angle은 이미 status_callback에서 받음
