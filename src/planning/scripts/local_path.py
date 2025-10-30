@@ -136,9 +136,9 @@ class LocalPath:
             self.global_path = msg
 
     def cluster_callback(self, msg):
-        rospy.logwarn("="*60)
-        rospy.logwarn(f"[CLUSTER_CALLBACK] Received {len(msg.detections)} detections")
-        rospy.logwarn(f"[CLUSTER_CALLBACK] ego_state: x={self.ego_state.x:.2f}, y={self.ego_state.y:.2f}, heading={self.ego_state.heading:.2f}")
+        # rospy.logwarn("="*60)
+        # rospy.logwarn(f"[CLUSTER_CALLBACK] Received {len(msg.detections)} detections")
+        # rospy.logwarn(f"[CLUSTER_CALLBACK] ego_state: x={self.ego_state.x:.2f}, y={self.ego_state.y:.2f}, heading={self.ego_state.heading:.2f}")
         
         self.obstacles = []
         
@@ -151,17 +151,33 @@ class LocalPath:
             
             dist = np.hypot(x_base, y_base)
             
-            rospy.logwarn(f"  Det {i}: x_base={x_base:.2f}, y_base={y_base:.2f}, dist={dist:.2f}")
+            # rospy.logwarn(f"  Det {i}: x_base={x_base:.2f}, y_base={y_base:.2f}, dist={dist:.2f}")
             
             if dist <= self.ego_filter_radius:
-                rospy.logwarn(f"    → FILTERED (ego)")
+                # rospy.logwarn(f"    → FILTERED (ego)")
+                continue
+
+            # 2. Guardrail filtering (size/ratio check)
+            length = detection.bbox.size.x
+            width = detection.bbox.size.y
+            height = detection.bbox.size.z
+
+            # Too long -> guardrail
+            if length > 10.0:
+                rospy.logwarn(f"    -> FILTERED (too long, length={length:.1f}m)")
+                continue
+            
+            # Aspect ratio check
+            aspect_ratio = length / (width + 1e-6)
+            if aspect_ratio > 8.0:
+                rospy.logwarn(f"    -> FILTERED (elongated, ratio={aspect_ratio:.1f})")
                 continue
             
             # 변환
             x_map = self.ego_state.x + x_base * cos_h - y_base * sin_h
             y_map = self.ego_state.y + x_base * sin_h + y_base * cos_h
             
-            rospy.logwarn(f"    → x_map={x_map:.2f}, y_map={y_map:.2f}")
+            # rospy.logwarn(f"    → x_map={x_map:.2f}, y_map={y_map:.2f}")
             
             obstacle = {
                 'object': type('obj', (), {
@@ -174,8 +190,8 @@ class LocalPath:
             
             self.obstacles.append(obstacle)
         
-        rospy.logwarn(f"[CLUSTER_CALLBACK] Final obstacles: {len(self.obstacles)}")
-        rospy.logwarn("="*60)
+        # rospy.logwarn(f"[CLUSTER_CALLBACK] Final obstacles: {len(self.obstacles)}")
+        # rospy.logwarn("="*60)
 
     def setup_reference_line(self):
         while not self.global_path:
@@ -411,7 +427,7 @@ class LocalPath:
         self.no_valid_path_cnt = 0
         
         # 목표 속도 계산
-        target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 6)))
+        target_v_idx = np.argmin(np.abs(opt_path.s0 - (self.s0 + 4)))
         
         self.plan_velocity_info_msg.current_speed = self.ego_state.v
         

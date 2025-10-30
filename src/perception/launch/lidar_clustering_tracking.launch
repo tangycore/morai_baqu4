@@ -7,24 +7,24 @@
   <arg name="cluster_result_topic"  default="cluster_result"/>
   
   <!-- Clustering parameters -->
-  <arg name="cluster_tolerance"     default="0.7"/>      <!-- Distance threshold for clustering (meters) -->
-  <arg name="min_cluster_size"      default="20"/>       <!-- Minimum points per cluster -->
-  <arg name="max_cluster_size"      default="8000"/>     <!-- Maximum points per cluster -->
+  <arg name="cluster_tolerance"     default="0.4"/>      <!-- Distance threshold for clustering (meters) -->
+  <arg name="min_cluster_size"      default="5"/>       <!-- Minimum points per cluster -->
+  <arg name="max_cluster_size"      default="500"/>     <!-- Maximum points per cluster -->
   
   <!-- Filtering parameters (base_link frame) -->
-  <arg name="max_distance"          default="60.0"/>     <!-- Maximum detection range (meters) -->
+  <arg name="max_distance"          default="100.0"/>     <!-- Maximum detection range (meters) -->
   <arg name="min_x"                 default="0.0"/>      <!-- Minimum X (behind vehicle filtered) -->
-  <arg name="max_x"                 default="60.0"/>     <!-- Maximum X (forward) -->
-  <arg name="min_y"                 default="-3.5"/>     <!-- Minimum Y (right side) -->
-  <arg name="max_y"                 default="3.5"/>      <!-- Maximum Y (left side) -->
-  <arg name="min_z"                 default="0.1"/>      <!-- Minimum Z (just above ground) -->
+  <arg name="max_x"                 default="100.0"/>     <!-- Maximum X (forward) -->
+  <arg name="min_y"                 default="-3.3"/>     <!-- Minimum Y (right side) -->
+  <arg name="max_y"                 default="3.3"/>      <!-- Maximum Y (left side) -->
+  <arg name="min_z"                 default="0.00"/>      <!-- Minimum Z (just above ground) -->
   <arg name="max_z"                 default="3.0"/>      <!-- Maximum Z (height limit) -->
   
   <!-- Ego vehicle bounds (base_link frame) -->
   <!-- Vehicle dimensions: Length 4.635m, Width 1.892m -->
   <!-- Origin at rear wheel center -->
   <arg name="ego_min_x"             default="-1.0"/>     <!-- Rear (rear overhang 0.79m + margin) -->
-  <arg name="ego_max_x"             default="4.7"/>      <!-- Front (wheelbase 3.0m + front overhang 0.845m + margin) -->
+  <arg name="ego_max_x"             default="5.0"/>      <!-- Front (wheelbase 3.0m + front overhang 0.845m + margin) -->
   <arg name="ego_min_y"             default="-1.0"/>     <!-- Right side (width/2 + margin) -->
   <arg name="ego_max_y"             default="1.0"/>      <!-- Left side (width/2 + margin) -->
   <arg name="ego_min_z"             default="-0.5"/>     <!-- Below vehicle -->

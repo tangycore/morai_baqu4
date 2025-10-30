@@ -259,44 +259,63 @@ def frenet_paths_to_world(frenet_paths, center_line_xlist, center_line_ylist, ce
             fp.ylist.append(y)
             center_headings.append(heading)
 
-        if len(fp.xlist) < 2:
-            fallback_yaw = center_headings[-1] if center_headings else 0.0
-            fp.yawlist.append(fallback_yaw)
-            fp.ds.append(0.0)
-        else:
-            for i in range(len(fp.xlist) - 1):
-                dx = fp.xlist[i + 1] - fp.xlist[i]
-                dy = fp.ylist[i + 1] - fp.ylist[i]
-                step = np.hypot(dx, dy)
-                if step < 1e-4:
-                    # fall back to the center-line heading when the step is nearly zero to avoid yaw spikes at stop
-                    fallback_idx = min(i + 1, len(center_headings) - 1)
-                    yaw = center_headings[fallback_idx]
-                else:
-                    yaw = np.arctan2(dy, dx)
-                fp.yawlist.append(yaw)
-                fp.ds.append(step)
+        num_points = len(fp.xlist)
+        if num_points == 0:
+            continue
 
-        if fp.yawlist:
-            fp.yawlist.append(fp.yawlist[-1])
-        else:
-            fallback_yaw = center_headings[-1] if center_headings else 0.0
-            fp.yawlist.append(fallback_yaw)
+        fp.yawlist = []
+        fp.ds = [0.0]
+        cumulative_s = [0.0]
+        last_heading = center_headings[-1] if center_headings else 0.0
 
-        if fp.ds:
-            fp.ds.append(fp.ds[-1])
-        else:
-            fp.ds.append(0.0)
+        if num_points == 1:
+            fp.yawlist.append(last_heading)
+            fp.kappa = np.zeros(1, dtype=float)
+            continue
 
-        xd = np.gradient(fp.xlist, GEN_T_STEP)
-        yd = np.gradient(fp.ylist, GEN_T_STEP)
+        total_s = 0.0
+        for i in range(num_points - 1):
+            dx = fp.xlist[i + 1] - fp.xlist[i]
+            dy = fp.ylist[i + 1] - fp.ylist[i]
+            raw_step = np.hypot(dx, dy)
+            step_for_curvature = max(raw_step, 1e-4)
 
-        xdd = np.gradient(xd, GEN_T_STEP)
-        ydd = np.gradient(yd, GEN_T_STEP)
+            if raw_step < 1e-4:
+                # fall back to the center-line heading when the step is nearly zero to avoid yaw spikes at stop
+                fallback_idx = min(i + 1, len(center_headings) - 1)
+                heading = center_headings[fallback_idx] if center_headings else last_heading
+            else:
+                heading = np.arctan2(dy, dx)
 
-        num = xd * ydd - yd * xdd
-        den = (xd**2 + yd**2)**1.5
-        fp.kappa = np.divide(num, den, out=np.zeros_like(num), where=den > 1e-4)
+            fp.yawlist.append(heading)
+            fp.ds.append(raw_step)
+
+            total_s += step_for_curvature
+            cumulative_s.append(total_s)
+            last_heading = heading
+
+        fp.yawlist.append(fp.yawlist[-1])
+
+        s_axis = np.asarray(cumulative_s, dtype=float)
+        x_array = np.asarray(fp.xlist, dtype=float)
+        y_array = np.asarray(fp.ylist, dtype=float)
+
+        if len(x_array) < 3 or s_axis[-1] < 1e-6:
+            fp.kappa = np.zeros(len(x_array), dtype=float)
+            continue
+
+        dx_ds = np.gradient(x_array, s_axis, edge_order=2)
+        dy_ds = np.gradient(y_array, s_axis, edge_order=2)
+        d2x_ds2 = np.gradient(dx_ds, s_axis, edge_order=2)
+        d2y_ds2 = np.gradient(dy_ds, s_axis, edge_order=2)
+
+        denom = (dx_ds**2 + dy_ds**2)**1.5
+        fp.kappa = np.divide(
+            dx_ds * d2y_ds2 - dy_ds * d2x_ds2,
+            denom,
+            out=np.zeros_like(dx_ds),
+            where=denom > 1e-6
+        )
 
 
     return frenet_paths
