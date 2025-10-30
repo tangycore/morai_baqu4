@@ -7,8 +7,8 @@
   <arg name="cluster_result_topic"  default="cluster_result"/>
   
   <!-- Clustering parameters -->
-  <arg name="cluster_tolerance"     default="0.5"/>      <!-- Distance threshold for clustering (meters) -->
-  <arg name="min_cluster_size"      default="20"/>       <!-- Minimum points per cluster -->
+  <arg name="cluster_tolerance"     default="0.7"/>      <!-- Distance threshold for clustering (meters) -->
+  <arg name="min_cluster_size"      default="25"/>       <!-- Minimum points per cluster -->
   <arg name="max_cluster_size"      default="8000"/>     <!-- Maximum points per cluster -->
   
   <!-- Filtering parameters (base_link frame) -->
@@ -17,7 +17,7 @@
   <arg name="max_x"                 default="60.0"/>     <!-- Maximum X (forward) -->
   <arg name="min_y"                 default="-5.0"/>     <!-- Minimum Y (right side) -->
   <arg name="max_y"                 default="5.0"/>      <!-- Maximum Y (left side) -->
-  <arg name="min_z"                 default="-0.2"/>     <!-- Minimum Z (just above ground) -->
+  <arg name="min_z"                 default="0.15"/>     <!-- Minimum Z (just above ground) -->
   <arg name="max_z"                 default="3.0"/>      <!-- Maximum Z (height limit) -->
   
   <!-- Ego vehicle bounds (base_link frame) -->
