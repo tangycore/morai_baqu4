@@ -20,4 +20,5 @@ compile_commands.json
 .DS_Store
 .ipynb_checkpoints/
 
+.devcontainer/
 
