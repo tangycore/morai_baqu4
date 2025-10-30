@@ -45,7 +45,7 @@ class StopLineDetection:
             self.output_topic, Float32MultiArray, queue_size=1
         )
         self.stop_decision_pub = rospy.Publisher(
-            self.output_bool_topic, int, queue_size=1
+            self.output_bool_topic, Bool, queue_size=1
         )
         rospy.loginfo("\033[1m[stop_line] publish: %s, %s\033[0m", self.output_topic, self.output_bool_topic)
     
