@@ -1,16 +1,17 @@
 <launch>
+    <arg name="enable_on_start" default="false"/>
     <arg name="input_topic" default="/image_jpeg/compressed"/>
     <arg name="use_compressed" default="true"/>
     <arg name="stop_roi_ratio" default="0.30"/>
     <arg name="output_topic" default="/stop_sequence/stop_line"/>
-    <arg name="viz_enable" default="true"/>
-    <arg name="viz_use_compressed" default="false"/>
-    <arg name="viz_topic" default="/stop_sequence/image_stop_line"/>
+    <arg name="output_bool_topic" default="/stop_sequence/stop_decision"/>
+
     <arg name="stop_line_pixels_per_meter" default="45.0"/>
     <arg name="stop_line_min_aspect" default="2.5"/>
     <arg name="stop_line_min_width" default="80.0"/>
 
     <node pkg="stop_sequence" type="stop_line_detection.py" name="stop_line_detect_node" output="screen">
+        <param name="enable_on_start" value="$(arg enable_on_start)"/>
         <param name="input_topic" value="$(arg input_topic)"/>
         <param name="use_compressed" value="$(arg use_compressed)"/>
         <param name="stop_roi_ratio" value="$(arg stop_roi_ratio)"/>
@@ -18,13 +19,7 @@
         <param name="stop_line_pixels_per_meter" value="$(arg stop_line_pixels_per_meter)"/>
         <param name="stop_line_min_aspect" value="$(arg stop_line_min_aspect)"/>
         <param name="stop_line_min_width" value="$(arg stop_line_min_width)"/>
-
-        <param name="viz_enable" value="$(arg viz_enable)"/>
-        <param name="viz_use_compressed" value="$(arg viz_use_compressed)"/>
-        <param name="viz_topic" value="$(arg viz_topic)"/>
-        <param name="viz_line_color_bgr" value="[0,0,255]" type="yaml"/>  <!-- 빨강 -->
-        <param name="viz_line_thickness" value="4"/>
-        <param name="viz_text" value="STOP LINE"/>
+        <param name="output_bool_topic" value="$(arg output_bool_topic)"/>
     </node>
 
 </launch>

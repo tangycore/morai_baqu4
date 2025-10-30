@@ -7,7 +7,7 @@ import numpy as np
 import rospy
 from cv_bridge import CvBridge
 from sensor_msgs.msg import CompressedImage, Image
-from std_msgs.msg import Float32MultiArray, MultiArrayDimension
+from std_msgs.msg import Float32MultiArray, MultiArrayDimension, Bool
 
 class StopLineDetection:
 
@@ -17,8 +17,13 @@ class StopLineDetection:
         self.bridge = CvBridge()
 
         # -------- input params --------
+        self.enabled = bool(rospy.get_param("~enabled_on_start", False))
+
+        self.image_sub = None  # image subscriber placeholder
+        self._manage_input_sub(self.enabled)
         self.input_topic = rospy.get_param("~input_topic", "/camera/image_raw")
         self.use_compressed = rospy.get_param("~use_compressed", False)
+
         self.roi_y_ratio = float(rospy.get_param("~roi_y_ratio", 0.55))
         self.stop_roi_ratio = float(rospy.get_param("~stop_roi_ratio", 0.25))
         self.stop_line_pixels_per_meter = float(
@@ -31,49 +36,46 @@ class StopLineDetection:
             rospy.get_param("~stop_line_min_width", 80.0)
         )
         self.output_topic = rospy.get_param("~output_topic", "/perception/stop_line")
+        self.output_bool_topic = rospy.get_param("~output_bool_topic", "/perception/stop_decision")
 
-        # -------- viz params (NEW) --------
-        self.viz_enable = rospy.get_param("~viz_enable", True)  # NEW
-        self.viz_use_compressed = rospy.get_param("~viz_use_compressed", self.use_compressed)  # NEW
-        # 기본 토픽명: private 네임스페이스 기준 ~out/...
-        self.viz_topic = rospy.get_param("~viz_topic",
-                                         "~out/compressed" if self.viz_use_compressed else "~out/image_raw")  # NEW
-        self.viz_line_color_bgr = tuple(int(x) for x in rospy.get_param("~viz_line_color_bgr", [0, 0, 255]))  # RED  # NEW
-        self.viz_line_thickness = int(rospy.get_param("~viz_line_thickness", 4))  # NEW
-        self.viz_text = rospy.get_param("~viz_text", "STOP LINE")  # NEW
-        self.viz_text_scale = float(rospy.get_param("~viz_text_scale", 0.8))  # NEW
-        self.viz_text_thickness = int(rospy.get_param("~viz_text_thickness", 2))  # NEW
-
-        # -------- subs --------
-        if self.use_compressed:
-            self.sub = rospy.Subscriber(
-                self.input_topic, CompressedImage, self.compressed_cb, queue_size=1
-            )
-        else:
-            self.sub = rospy.Subscriber(
-                self.input_topic, Image, self.image_cb, queue_size=1
-            )
-        rospy.loginfo(
-            "\033[1m[stop_line] subscribe: %s (compressed=%s)\033[0m",
-            self.input_topic,
-            self.use_compressed,
-        )
+        self.enable_sub = rospy.Subscriber("/stop_sequence/enable", Bool, self._on_enable, queue_size=1)
 
         # -------- pubs --------
-        self.stop_pub = rospy.Publisher(
+        self.stop_line_pub = rospy.Publisher(
             self.output_topic, Float32MultiArray, queue_size=1
         )
-        rospy.loginfo("\033[1m[stop_line] publish: %s \033[0m", self.output_topic)
+        self.stop_decision_pub = rospy.Publisher(
+            self.output_bool_topic, int, queue_size=1
+        )
+        rospy.loginfo("\033[1m[stop_line] publish: %s, %s\033[0m", self.output_topic, self.output_bool_topic)
+    
+    def _on_enable(self, msg: Bool) -> None:
+        if msg.data != self.enabled:
+            self.enabled = msg.data
+            self._manage_input_sub(self.enabled)
+            rospy.loginfo(f"[stop_line] enabled -> {self.enabled}")
 
-        # (NEW) viz publisher
-        self.viz_pub = None  # NEW
-        if self.viz_enable:  # NEW
-            if self.viz_use_compressed:
-                self.viz_pub = rospy.Publisher(self.viz_topic, CompressedImage, queue_size=1)
+    def _manage_input_sub(self, turn_on: bool) -> None:
+        rospy.loginfo(f"[stop_line] managing input sub -> {turn_on}")
+        if turn_on and self.image_sub is None:
+            # -------- subs --------
+            if self.use_compressed:
+                self.image_sub = rospy.Subscriber(
+                    self.input_topic, CompressedImage, self.compressed_cb, queue_size=1
+                )
             else:
-                self.viz_pub = rospy.Publisher(self.viz_topic, Image, queue_size=1)
-            rospy.loginfo("\033[1m[stop_line] viz publish: %s (compressed=%s)\033[0m",
-                          rospy.resolve_name(self.viz_topic), self.viz_use_compressed)
+                self.image_sub = rospy.Subscriber(
+                    self.input_topic, Image, self.image_cb, queue_size=1
+                )
+            rospy.loginfo(
+                "\033[1m[stop_line] subscribe: %s (compressed=%s)\033[0m",
+                self.input_topic,
+                self.use_compressed,
+            )
+        elif (not turn_on) and self.image_sub is not None:
+            self.image_sub.unregister()
+            self.image_sub = None
+            rospy.loginfo("[stop_line] image subscription STOPPED")
 
     def compressed_cb(self, msg: CompressedImage) -> None:
         np_arr = np.frombuffer(msg.data, np.uint8)
@@ -97,11 +99,7 @@ class StopLineDetection:
         stop_line = self.detect_stop_line(frame, roi_y)
 
         self.publish_stop_line(stop_line)
-
-        # (NEW) visualize and publish overlay
-        if self.viz_enable and self.viz_pub is not None:
-            out = self.draw_overlay(frame, stop_line)  # draw on full frame
-            self.publish_viz(out, header)
+        self.publish_stop_decision(stop_line)
 
     @staticmethod
     def extract_roi(frame: np.ndarray, roi_ratio: float) -> Tuple[np.ndarray, int]:
@@ -159,8 +157,6 @@ class StopLineDetection:
 
         return best_line
 
-
-
     def publish_stop_line(
         self, stop_line: Optional[Tuple[float, float, float, float, float]]
     ) -> None:
@@ -176,47 +172,15 @@ class StopLineDetection:
             field_dim.size = 5
             field_dim.stride = 1
             array.layout.dim = [dim, field_dim]
-        self.stop_pub.publish(array)
+        self.stop_line_pub.publish(array)
 
-    # ---------- NEW: overlay + publish ----------
-    def draw_overlay(self, frame: np.ndarray,
-                     stop_line: Optional[Tuple[float, float, float, float, float]]) -> np.ndarray:
-        h, w = frame.shape[:2]
-        canvas = frame.copy()
-        if stop_line is not None:
-            x1, y1, x2, y2, dst = stop_line
-            # 안전 클램프
-            x1 = int(np.clip(x1, 0, w - 1)); y1 = int(np.clip(y1, 0, h - 1))
-            x2 = int(np.clip(x2, 0, w - 1)); y2 = int(np.clip(y2, 0, h - 1))
-            # 선
-            cv2.line(canvas, (x1, y1), (x2, y2),
-                     self.viz_line_color_bgr, self.viz_line_thickness, cv2.LINE_AA)
-            # 라벨(중앙 위)
-            tx, ty = int((x1 + x2) / 2), int((y1 + y2) / 2) - 10
-            cv2.putText(canvas, self.viz_text, (tx, max(0, ty)),
-                        cv2.FONT_HERSHEY_SIMPLEX, self.viz_text_scale,
-                        self.viz_line_color_bgr, self.viz_text_thickness, cv2.LINE_AA)
-        else:
-            cv2.putText(canvas, "NO STOP LINE", (20, 40),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2, cv2.LINE_AA)
-        return canvas
-
-    def publish_viz(self, image_bgr: np.ndarray, header=None) -> None:
-        if self.viz_pub is None:
-            return
-        if self.viz_use_compressed:
-            msg = CompressedImage()
-            if header is not None:
-                msg.header = header
-            msg.format = "jpeg"
-            msg.data = np.array(cv2.imencode(".jpg", image_bgr)[1]).tobytes()
-            self.viz_pub.publish(msg)
-        else:
-            msg = self.bridge.cv2_to_imgmsg(image_bgr, "bgr8")
-            if header is not None:
-                msg.header = header
-            self.viz_pub.publish(msg)
-    # ---------- NEW end ----------
+    def publish_stop_decision(
+        self, stop_line: Optional[Tuple[float, float, float, float, float]]
+    ) -> None:
+        stop = stop_line is not None and stop_line[4] > 1.0  # 1 meter threshold
+        if stop:
+            rospy.logwarn("[stop_line] STOP line detected within 1 meter.")
+        self.stop_decision_pub.publish(Bool(data=stop))
 
     def spin(self) -> None:
         rospy.spin()

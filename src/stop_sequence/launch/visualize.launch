@@ -1,0 +1,13 @@
+<launch>
+    <arg name="viz_enable" default="true"/>
+    <arg name="viz_use_compressed" default="false"/>
+    <arg name="viz_topic" default="/stop_sequence/image_stop_line"/>
+
+    <node pkg="stop_sequence" type="visualize_detection.py" name="visualize_detection_node" output="screen">
+        <param name="viz_enable" value="$(arg viz_enable)"/>
+        <param name="viz_use_compressed" value="$(arg viz_use_compressed)"/>
+        <param name="viz_topic" value="$(arg viz_topic)"/>
+        <param name="viz_line_color_bgr" value="[0,0,255]" type="yaml"/>  <!-- 빨강 -->
+        <param name="viz_line_thickness" value="4"/>
+        <param name="viz_text" value="STOP LINE"/>
+</launch>

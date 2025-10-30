@@ -5,6 +5,7 @@ import rospkg
 import rospy
 import sensor_msgs.msg as sensor_msg
 import vision_msgs.msg as vision_msg
+import std_msgs.msg as std_msg
 from ultralytics import YOLO
 
 
@@ -43,6 +44,7 @@ class TrafficLightDetection:
         # ==== Pub/Sub ====
         self.sub = rospy.Subscriber(self.input_topic, sensor_msg.CompressedImage,
                                     self.image_callback, queue_size=1)
+        self.pub_stop_enable = rospy.Publisher("/stop_sequence/enable", std_msg.Bool, queue_size=1, latch=True)
         self.result_pub = rospy.Publisher(self.result_topic,
                                           vision_msg.Detection2DArray, queue_size=1)
         self.result_image_pub = rospy.Publisher(self.result_image_topic,
@@ -91,6 +93,8 @@ class TrafficLightDetection:
 
             self.result_pub.publish(result_msg)
             self.result_image_pub.publish(result_image_msg)
+
+            self.on_inference_result(result_msg)
         except Exception as e:
             rospy.logerr("Result publishing failed: %s", str(e))
 
@@ -142,6 +146,14 @@ class TrafficLightDetection:
             plotted_image, encoding="bgr8"
         )
         return image_msg
+    
+    def on_inference_result(self, result):
+        red_detected = self._is_red(result)
+        self.pub_stop_enable.publish(std_msg.Bool(data=red_detected))
+
+    def _is_red(self, results: vision_msg.Detection2DArray) -> bool:
+        ids = {getattr(h, "id", None) for d in results.detections for h in d.results}
+        return "red" in ids and "red-arrow" not in ids
     
     def spin(self):
         rospy.spin()

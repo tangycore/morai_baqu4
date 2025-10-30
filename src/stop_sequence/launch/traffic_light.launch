@@ -1,10 +1,10 @@
 <launch>
   <!-- 공통 인자: 필요시 바꿔서 사용 -->
-  <arg name="model" default="traffic_local.pt"/>
+  <arg name="model" default="traffic_colab.pt"/>
   <arg name="input_topic" default="/image_jpeg/compressed"/>
   <arg name="result_topic" default="/traffic_light/result"/>
   <arg name="result_image_topic" default="/traffic_light/image_raw"/>
-  <arg name="conf_thres" default="0.75"/>
+  <arg name="conf_thres" default="0.73"/>
   <arg name="iou_thres" default="0.45"/>
   <arg name="max_det" default="300"/>
   <arg name="classes" default="[0,1,2,3,4]"/>
