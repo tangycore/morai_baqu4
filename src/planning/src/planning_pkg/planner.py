@@ -112,7 +112,7 @@ def generate_velocity_keeping_trajectories_in_frenet(lat_state, lon_state, opt_d
         desired_speed_list = sorted(set(np.arange(5, desired_speed + 5, 5)) | {desired_speed})
     curr_desired_speed_idx = min(bisect.bisect_left(desired_speed_list, lon_state[1]), len(desired_speed_list) - 1)
     curr_desired_speed = desired_speed_list[curr_desired_speed_idx]
-    dt_0_candidates = [0]
+    dt_0_candidates = [-2, 0]
     st_1_candidates = np.arange(curr_desired_speed + ST_1_MIN, curr_desired_speed + ST_1_MAX + ST_1_STEP, ST_1_STEP)
     for tt in np.arange(v_keep_tt_min, v_keep_tt_max + TT_STEP, TT_STEP):
         lat_traj_list = generate_lateral_movement(*lat_state, tt, v_keep_tt_max, dt_0_candidates)
@@ -221,16 +221,16 @@ def generate_following_trajectories_in_frenet(lat_state, lon_state, lv, opt_d):
             for lon_traj in lon_traj_list:
                 fp = FrenetPath()
 
-                fp.t = lat_traj['t']
-                fp.d0 = lat_traj['d0']
-                fp.d1 = lat_traj['d1']
-                fp.d2 = lat_traj['d2']
-                fp.dj = lat_traj['jerk']
+                fp.t = np.array(lat_traj['t'])
+                fp.d0 = np.array(lat_traj['d0'])
+                fp.d1 = np.array(lat_traj['d1'])
+                fp.d2 = np.array(lat_traj['d2'])
+                fp.dj = np.array(lat_traj['jerk'])
 
-                fp.s0 = lon_traj['s0']
-                fp.s1 = lon_traj['s1']
-                fp.s2 = lon_traj['s2']
-                fp.sj = lon_traj['jerk']
+                fp.s0 = np.array(lon_traj['s0'])
+                fp.s1 = np.array(lon_traj['s1'])
+                fp.s2 = np.array(lon_traj['s2'])
+                fp.sj = np.array(lon_traj['jerk'])
 
                 d_diff = (lat_traj['d0'][-1] - opt_d)**2
                 lat_cost = K_J * sum(np.power(lat_traj['jerk'], 2)) + K_T * tt + K_D * d_diff
@@ -298,21 +298,65 @@ def frenet_paths_to_world(frenet_paths, center_line_xlist, center_line_ylist, ce
         den = (xd**2 + yd**2)**1.5
         fp.kappa = np.divide(num, den, out=np.zeros_like(num), where=den > 1e-4)
 
+
     return frenet_paths
 
 def check_collision(path, obstacles):
-    if any(np.array(path.d0) > 4.25) or any(np.array(path.d0) < -4.25):
-        return True
+    """Two-circle collision check - fast and simple!"""
+    if not path.xlist or not path.yawlist or not obstacles:
+        return False
+    
+    # NumPy 배열 변환
+    px_array = np.array(path.xlist)
+    py_array = np.array(path.ylist)
+    yaw_array = np.array(path.yawlist)
+    
+    # 삼각함수 계산 (한 번만!)
+    cos_yaw = np.cos(yaw_array)
+    sin_yaw = np.sin(yaw_array)
+    
+    # 차량 파라미터
+    wheelbase_half = WHEEL_BASE * 0.5  # 1.5m
+    vehicle_radius = OVERALL_WIDTH * 0.5 + 0.3  # 0.946 + 0.3 = 1.246m
+    
+    # 전방/후방 원 중심
+    front_x = px_array + wheelbase_half * cos_yaw
+    front_y = py_array + wheelbase_half * sin_yaw
+    rear_x = px_array - wheelbase_half * cos_yaw
+    rear_y = py_array - wheelbase_half * sin_yaw
+    
+    # Early rejection을 위한 경로 시작점
+    start_x = px_array[0]
+    start_y = py_array[0]
     
     for obstacle in obstacles:
-        obj = obstacle['object']
-
-        obs_r = 0.5 * np.hypot(obj.width, obj.height)
-        for x, y in zip(path.xlist, path.ylist):
-            d = np.hypot(obj.x - x, obj.y - y)
-            if d < obs_r + BUBBLE_R:
-                return True
-
+        obj = obstacle.get('object')
+        if obj is None:
+            continue
+        
+        ox = float(getattr(obj, 'x', 0.0))
+        oy = float(getattr(obj, 'y', 0.0))
+        
+        # ✅ Early rejection: 너무 멀면 스킵
+        dist_to_start = np.hypot(ox - start_x, oy - start_y)
+        if dist_to_start > 40.0:
+            continue
+        
+        # 장애물 반경
+        obs_w = float(getattr(obj, 'width', 0.0))
+        obs_h = float(getattr(obj, 'height', 0.0))
+        obs_radius = max(0.5 * np.hypot(obs_w, obs_h), 0.4)
+        
+        # 안전 거리
+        safety_dist = vehicle_radius + obs_radius
+        
+        # 전방/후방 원 충돌 체크
+        front_dist = np.hypot(front_x - ox, front_y - oy)
+        rear_dist = np.hypot(rear_x - ox, rear_y - oy)
+        
+        if np.any(front_dist < safety_dist) or np.any(rear_dist < safety_dist):
+            return True
+    
     return False
 
 def is_forward_motion(path, eps=1e-4):
@@ -365,6 +409,7 @@ def check_valid_path(paths, obs):
             cb += 1
             continue
         elif obs and check_collision(path, obs):
+            co += 1
             continue
         valid_paths.append(path)
     rospy.logwarn(f"check_valid_path total: {len(paths)} \n constraint => velo: {cv}, accel: {ca}, kappa: {ck}, back: {cb}, colli: {co}")

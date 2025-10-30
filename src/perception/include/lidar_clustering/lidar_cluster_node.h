@@ -23,7 +23,7 @@ struct ClusteringParams
     int max_size;
     
     ClusteringParams() 
-        : tolerance(0.5f), min_size(20), max_size(25000) {}
+        : tolerance(0.7f), min_size(20), max_size(8000) {}
 };
 
 /**
@@ -40,10 +40,10 @@ struct FilteringParams
     float max_z;
     
     FilteringParams() 
-        : max_distance(50.0f), 
-          min_x(1.0f), max_x(100.0f),
-          min_y(-5.0f), max_y(5.0f),
-          min_z(-2.0f), max_z(-0.5f) {}
+        : max_distance(60.0f),
+          min_x(0.0f), max_x(60.0f),
+          min_y(-3.5f), max_y(3.5f),
+          min_z(0.1f), max_z(3.0f) {}
 };
 
 /**

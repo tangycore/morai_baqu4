@@ -26,7 +26,7 @@ ST_1_STEP = 2
 
 # terminal time config
 V_KEEP_TT_MIN = 3
-V_KEEP_TT_MAX = 6
+V_KEEP_TT_MAX = 5
 STOP_TT_MIN = 6
 STOP_TT_MAX = 10
 FOLLOWING_TT_MIN = 3
@@ -43,9 +43,9 @@ SHOW_OPT_PATH = True
 SHOW_VALID_PATH = True
 
 # cost config
-K_J   = 0.1 # jerk config
-K_T   = 100 # time cost config (얼마나 빠르게 도달 할건지)
-K_D   = 150.0 # lateral cost config
+K_J   = 0.02 # jerk config
+K_T   = 30 # time cost config (얼마나 빠르게 도달 할건지)
+K_D   = 30.0 # lateral cost config
 K_S   = 1.0 # longitunial cost config
 
 K_LAT = 1.0 # lateral cost config when combine lateral and longitunial traj
