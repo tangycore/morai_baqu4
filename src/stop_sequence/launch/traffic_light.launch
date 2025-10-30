@@ -1,6 +1,6 @@
 <launch>
   <!-- 공통 인자: 필요시 바꿔서 사용 -->
-  <arg name="model" default="traffic_colab.pt"/>
+  <arg name="model" default="traffic_best.pt"/>
   <arg name="input_topic" default="/image_jpeg/compressed"/>
   <arg name="result_topic" default="/traffic_light/result"/>
   <arg name="result_image_topic" default="/traffic_light/image_raw"/>
