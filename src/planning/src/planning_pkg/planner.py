@@ -307,35 +307,12 @@ def check_collision(path, obstacles):
     for obstacle in obstacles:
         obj = obstacle['object']
 
-        if obstacle['type'] != 'vehicle':
-            obs_r = 0.5 * np.hypot(obj.width, obj.height)
-            for x, y in zip(path.xlist, path.ylist):
-                d = np.hypot(obj.x - x, obj.y - y)
-                if d < obs_r + BUBBLE_R:
-                    return True
+        obs_r = 0.5 * np.hypot(obj.width, obj.height)
+        for x, y in zip(path.xlist, path.ylist):
+            d = np.hypot(obj.x - x, obj.y - y)
+            if d < obs_r + BUBBLE_R:
+                return True
 
-        else:
-            obs_rear_x = obj.x
-            obs_rear_y = obj.y
-            obs_front_x = obj.x + obj.WHEEL_BASE * np.cos(obj.yaw)
-            obs_front_y = obj.y + obj.WHEEL_BASE * np.sin(obj.yaw)
-            gap = 0
-
-            for x, y, yaw in zip(path.xlist, path.ylist, path.yawlist):
-                ego_rear_x, ego_rear_y = x, y
-                ego_front_x = x + WHEEL_BASE * np.cos(yaw)
-                ego_front_y = y + WHEEL_BASE * np.sin(yaw)
-
-                d_rr = np.hypot(ego_rear_x - obs_rear_x, ego_rear_y - obs_rear_y)
-                d_rf = np.hypot(ego_rear_x - obs_front_x, ego_rear_y - obs_front_y)
-                d_fr = np.hypot(ego_front_x - obs_rear_x, ego_front_y - obs_rear_y)
-                d_ff = np.hypot(ego_front_x - obs_front_x, ego_front_y - obs_front_y)
-
-                if (d_rr + gap < BUBBLE_R + obj.BUBBLE_R or
-                    d_rf + gap < BUBBLE_R + obj.BUBBLE_R or
-                    d_fr + gap < BUBBLE_R + obj.BUBBLE_R or
-                    d_ff + gap < BUBBLE_R + obj.BUBBLE_R):
-                    return True
     return False
 
 def is_forward_motion(path, eps=1e-4):

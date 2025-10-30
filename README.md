@@ -76,5 +76,4 @@ push after git sync
  - [바로가기](./src/planning)
 ### Control
 - [바로가기](./src/control)
-### Localization
-- [바로가기](https://github.com/hku-mars/FAST_LIO/tree/7cc4175de6f8ba2edf34bab02a42195b141027e9)
+- 

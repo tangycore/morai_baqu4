@@ -158,7 +158,6 @@ class LocalPath:
             
             # Planning 모듈이 요구하는 형식으로 변환
             obstacle = {
-                'type': 'unknown',  # vehicle이 아닌 타입
                 'object': type('obj', (), {
                     'x': x,
                     'y': y,

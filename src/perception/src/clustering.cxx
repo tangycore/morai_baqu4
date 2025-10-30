@@ -60,6 +60,9 @@ private:
   float min_z_;
   float min_y_;
   float max_y_;
+  float marker_size_x_;
+  float marker_size_y_;
+  float marker_size_z_;
   
   ros::Time last_call_time_;
 
@@ -81,6 +84,9 @@ public:
     pnh_.param<float>("min_z", min_z_, -2.0);
     pnh_.param<float>("min_y", min_y_, -5.0);  // 우측
     pnh_.param<float>("max_y", max_y_, 5.0);   // 좌측
+    pnh_.param<float>("marker_size_x", marker_size_x_, 1.0);
+    pnh_.param<float>("marker_size_y", marker_size_y_, 1.0);
+    pnh_.param<float>("marker_size_z", marker_size_z_, 1.0);
     
     // Publishers
     cluster_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("cluster_cloud", 1);
@@ -345,9 +351,9 @@ public:
         marker.type = visualization_msgs::Marker::CUBE;
         marker.action = visualization_msgs::Marker::ADD;
         marker.pose = det.bbox.center;
-        marker.scale.x = det.bbox.size.x;
-        marker.scale.y = det.bbox.size.y;
-        marker.scale.z = det.bbox.size.z;
+        marker.scale.x = marker_size_x_;
+        marker.scale.y = marker_size_y_;
+        marker.scale.z = marker_size_z_;
         
         // 색상: 초록색 (클러스터)
         marker.color.r = 0.0;
@@ -366,7 +372,7 @@ public:
         text_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
         text_marker.action = visualization_msgs::Marker::ADD;
         text_marker.pose = det.bbox.center;
-        text_marker.pose.position.z += det.bbox.size.z / 2 + 0.5;  // 위쪽에 표시
+        text_marker.pose.position.z += marker.scale.z / 2 + 0.5;  // 위쪽에 표시
         text_marker.scale.z = 0.5;
         text_marker.color.r = 1.0;
         text_marker.color.g = 1.0;
