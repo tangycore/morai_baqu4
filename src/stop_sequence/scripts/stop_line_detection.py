@@ -21,6 +21,15 @@ class StopLineDetection:
         self.use_compressed = rospy.get_param("~use_compressed", False)
         self.roi_y_ratio = float(rospy.get_param("~roi_y_ratio", 0.55))
         self.stop_roi_ratio = float(rospy.get_param("~stop_roi_ratio", 0.25))
+        self.stop_line_pixels_per_meter = float(
+            rospy.get_param("~stop_line_pixels_per_meter", 45.0)
+        )
+        self.stop_line_min_aspect = float(
+            rospy.get_param("~stop_line_min_aspect", 2.5)
+        )
+        self.stop_line_min_width = float(
+            rospy.get_param("~stop_line_min_width", 80.0)
+        )
         self.output_topic = rospy.get_param("~output_topic", "/perception/stop_line")
 
         # -------- viz params (NEW) --------
@@ -109,7 +118,7 @@ class StopLineDetection:
 
     def detect_stop_line(
         self, frame: np.ndarray, roi_y: int
-    ) -> Optional[Tuple[float, float, float, float]]:
+    ) -> Optional[Tuple[float, float, float, float, float]]:
         h, _ = frame.shape[:2]
         start_y = max(int(h * (1.0 - self.stop_roi_ratio)), roi_y)
         roi = frame[start_y:, :]
@@ -132,38 +141,50 @@ class StopLineDetection:
                 continue
             if abs(angle) > 20.0:
                 continue
+            aspect = width / float(max(height, 1e-3))
+            if aspect < self.stop_line_min_aspect:
+                continue
+            if width < self.stop_line_min_width:
+                continue
             if width < best_width:
                 continue
             best_width = width
             x1 = cx - width / 2.0
             x2 = cx + width / 2.0
             y_world = cy + start_y
-            best_line = (float(x1), float(y_world), float(x2), float(y_world))
+            distance_pixels = float(h - y_world)
+            px_per_meter = max(self.stop_line_pixels_per_meter, 1e-3)
+            distance_m = max(0.0, distance_pixels / px_per_meter)
+            best_line = (float(x1), float(y_world), float(x2), float(y_world), distance_m)
 
         return best_line
 
-    def publish_stop_line(self, stop_line: Optional[Tuple[float, float, float, float]]) -> None:
+
+
+    def publish_stop_line(
+        self, stop_line: Optional[Tuple[float, float, float, float, float]]
+    ) -> None:
         array = Float32MultiArray()
         if stop_line is not None:
-            array.data = [stop_line[0], stop_line[1], stop_line[2], stop_line[3]]
+            array.data = [stop_line[0], stop_line[1], stop_line[2], stop_line[3], stop_line[4]]
             dim = MultiArrayDimension()
-            dim.label = "stop_line[x1,y1,x2,y2]"
+            dim.label = "stop_line[x1,y1,x2,y2,distance]"
             dim.size = 1
-            dim.stride = 4
+            dim.stride = 5
             field_dim = MultiArrayDimension()
             field_dim.label = "fields"
-            field_dim.size = 4
+            field_dim.size = 5
             field_dim.stride = 1
             array.layout.dim = [dim, field_dim]
         self.stop_pub.publish(array)
 
     # ---------- NEW: overlay + publish ----------
     def draw_overlay(self, frame: np.ndarray,
-                     stop_line: Optional[Tuple[float, float, float, float]]) -> np.ndarray:
+                     stop_line: Optional[Tuple[float, float, float, float, float]]) -> np.ndarray:
         h, w = frame.shape[:2]
         canvas = frame.copy()
         if stop_line is not None:
-            x1, y1, x2, y2 = stop_line
+            x1, y1, x2, y2, dst = stop_line
             # 안전 클램프
             x1 = int(np.clip(x1, 0, w - 1)); y1 = int(np.clip(y1, 0, h - 1))
             x2 = int(np.clip(x2, 0, w - 1)); y2 = int(np.clip(y2, 0, h - 1))
