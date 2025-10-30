@@ -153,7 +153,7 @@ class TrafficLightDetection:
 
     def _is_red(self, results: vision_msg.Detection2DArray) -> bool:
         ids = {getattr(h, "id", None) for d in results.detections for h in d.results}
-        return "red" in ids and "red-arrow" not in ids
+        return "red" in ids or "red-arrow" in ids
     
     def spin(self):
         rospy.spin()
