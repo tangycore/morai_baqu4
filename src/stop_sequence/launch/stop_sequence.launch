@@ -1,0 +1,15 @@
+<launch>
+  <arg name="show_viewer" default="false"/>
+
+  <include file="$(find stop_sequence)/launch/traffic_light.launch">
+    <arg name="input_topic" value="/image_jpeg/compressed"/>
+  </include>
+
+  <include file="$(find stop_sequence)/launch/stop_line.launch">
+    <arg name="input_topic" value="/image_jpeg/compressed"/>
+  </include>
+
+  <node if="$(arg show_viewer)" pkg="rviz" type="rviz" name="rviz_image"
+    args="-d $(find stop_sequence)/config/image_mini.rviz"
+    output="screen" />
+</launch>

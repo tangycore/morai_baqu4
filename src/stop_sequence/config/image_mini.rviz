@@ -1,0 +1,8 @@
+Visualization Manager:
+  Displays:
+    - Class: rviz/Image
+      Name: Image
+      Image Topic: /traffic_light/image_raw
+      Transport Hint: raw
+  Global Options:
+    Fixed Frame: base_link

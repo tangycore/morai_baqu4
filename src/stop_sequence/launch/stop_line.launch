@@ -1,0 +1,14 @@
+<launch>
+    <arg name="input_topic" default="/image_jpeg/compressed"/>
+    <arg name="use_compressed" default="true"/>
+    <arg name="stop_roi_ratio" default="0.30"/>
+    <arg name="output_topic" default="/stop_sequence/stop_line"/>
+
+
+    <node pkg="stop_sequence" type="stop_line_detection.py" name="stop_line_detect_node" output="screen">
+        <param name="input_topic" value="$(arg input_topic)"/>
+        <param name="use_compressed" value="$(arg use_compressed)"/>
+        <param name="stop_roi_ratio" value="$(arg stop_roi_ratio)"/>
+        <param name="output_topic" value="$(arg output_topic)"/>
+    </node>
+</launch>

@@ -26,10 +26,6 @@
 	path = src/slam/glim
 	url = git@github.com:BBAAMM/glim
 	branch = v1.1.1
-[submodule "src/livox_ros_driver"]
-	path = src/livox_ros_driver
-	url = https://github.com/Livox-SDK/livox_ros_driver.git
-	branch = master
 [submodule "src/fast_lio"]
 	path = src/fast_lio
 	url = https://github.com/hku-mars/FAST_LIO.git

@@ -1,7 +1,7 @@
 import numpy as np
 import rospy
 from math import cos, sin
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 def pi_2_pi(angle):
     return (angle + np.pi) % (2 * np.pi) - np.pi
@@ -46,14 +46,14 @@ class PurePursuit:
         ld_idx = self.find_lookahead_point(state, traj)
         dx = traj[0][ld_idx] - state[0]
         dy = traj[1][ld_idx] - state[1]
-        plt.cla()
-        plt.plot(traj[0], traj[1])
-        plt.plot(traj[0][ld_idx], traj[1][ld_idx], 'xr', label='LookAhead')
-        plt.plot(state[0], state[1], 'xb', label='Ego')
-        plt.axis('equal')
-        plt.title('pure pursuit')
-        plt.legend()
-        plt.pause(0.001)
+        # plt.cla()
+        # plt.plot(traj[0], traj[1])
+        # plt.plot(traj[0][ld_idx], traj[1][ld_idx], 'xr', label='LookAhead')
+        # plt.plot(state[0], state[1], 'xb', label='Ego')
+        # plt.axis('equal')
+        # plt.title('pure pursuit')
+        # plt.legend()
+        # plt.pause(0.001)
         alpha = pi_2_pi(np.arctan2(dy, dx) - state[2])
         # if abs(alpha) < np.deg2rad(1.0):  # 작은 각 무시 (직진 안정화)
         #     alpha = 0.0
