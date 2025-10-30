@@ -1,62 +1,62 @@
 <launch>
-  <!-- LiDAR Clustering with Tracking -->
+  <!-- LiDAR Clustering Node with Tracking for MORAI Simulator -->
+  <!-- All parameters are in base_link frame -->
   
   <arg name="lidar_topic"           default="/front_lidar/velodyne_points"/>
   <arg name="output_frame"          default="base_link"/>
   <arg name="cluster_result_topic"  default="cluster_result"/>
   
-  <!-- ========== 클러스터링 파라미터 (여기만 조정하면 됨) ========== -->
-  <arg name="cluster_tolerance"     default="0.65"/>      
-  <arg name="min_cluster_size"      default="20"/>       
-  <arg name="max_cluster_size"      default="5000"/>     
+  <!-- Clustering parameters -->
+  <arg name="cluster_tolerance"     default="0.4"/>      <!-- Distance threshold for clustering (meters) -->
+  <arg name="min_cluster_size"      default="5"/>       <!-- Minimum points per cluster -->
+  <arg name="max_cluster_size"      default="500"/>     <!-- Maximum points per cluster -->
   
-  <!-- ========== ROI 필터링 (관심 영역 설정) ========== -->
-  <arg name="max_distance"          default="80.0"/>     
-  <arg name="min_x"                 default="-5.0"/>     
-  <arg name="min_y"                 default="-6.0"/>     
-  <arg name="max_y"                 default="6.0"/>      
-  <arg name="min_z"                 default="-0.2"/>     
-  <arg name="max_z"                 default="2.0"/>      
+  <!-- Filtering parameters (base_link frame) -->
+  <arg name="max_distance"          default="100.0"/>     <!-- Maximum detection range (meters) -->
+  <arg name="min_x"                 default="0.0"/>      <!-- Minimum X (behind vehicle filtered) -->
+  <arg name="max_x"                 default="100.0"/>     <!-- Maximum X (forward) -->
+  <arg name="min_y"                 default="-3.3"/>     <!-- Minimum Y (right side) -->
+  <arg name="max_y"                 default="3.3"/>      <!-- Maximum Y (left side) -->
+  <arg name="min_z"                 default="0.00"/>      <!-- Minimum Z (just above ground) -->
+  <arg name="max_z"                 default="3.0"/>      <!-- Maximum Z (height limit) -->
   
-  <!-- ========== Ego Vehicle (자차 필터링) ========== -->
-  <!-- 코드 기본값(-1~4.7, -1~1, -0.5~2) 사용 -->
-  <!-- 자차 포인트가 보이면 아래 주석 해제하여 조정 -->
-  <!-- 
-  <arg name="ego_min_x"             default="-1.0"/>     
-  <arg name="ego_max_x"             default="4.0"/>      
-  <arg name="ego_min_y"             default="-1.1"/>     
-  <arg name="ego_max_y"             default="1.1"/>      
-  <arg name="ego_min_z"             default="-0.5"/>     
-  <arg name="ego_max_z"             default="2.5"/>
-  -->
-  
+  <!-- Ego vehicle bounds (base_link frame) -->
+  <!-- Vehicle dimensions: Length 4.635m, Width 1.892m -->
+  <!-- Origin at rear wheel center -->
+  <arg name="ego_min_x"             default="-1.0"/>     <!-- Rear (rear overhang 0.79m + margin) -->
+  <arg name="ego_max_x"             default="5.0"/>      <!-- Front (wheelbase 3.0m + front overhang 0.845m + margin) -->
+  <arg name="ego_min_y"             default="-1.0"/>     <!-- Right side (width/2 + margin) -->
+  <arg name="ego_max_y"             default="1.0"/>      <!-- Left side (width/2 + margin) -->
+  <arg name="ego_min_z"             default="-0.5"/>     <!-- Below vehicle -->
+  <arg name="ego_max_z"             default="2.0"/>      <!-- Above vehicle (height 2.434m) -->
+
   <node pkg="lidar_clustering" type="lidar_clustering_node" name="lidar_cluster_node" output="screen">
+    <!-- Topic settings -->
     <param name="lidar_topic"           value="$(arg lidar_topic)"/>
     <param name="output_frame"          value="$(arg output_frame)"/>
     <param name="cluster_result_topic"  value="$(arg cluster_result_topic)"/>
     
-    <!-- 클러스터링 파라미터 -->
+    <!-- Clustering parameters -->
     <param name="cluster_tolerance"     value="$(arg cluster_tolerance)"/>
     <param name="min_cluster_size"      value="$(arg min_cluster_size)"/>
     <param name="max_cluster_size"      value="$(arg max_cluster_size)"/>
     
-    <!-- ROI 필터링 -->
+    <!-- Filtering parameters -->
     <param name="max_distance"          value="$(arg max_distance)"/>
     <param name="min_x"                 value="$(arg min_x)"/>
+    <param name="max_x"                 value="$(arg max_x)"/>
     <param name="min_y"                 value="$(arg min_y)"/>
     <param name="max_y"                 value="$(arg max_y)"/>
     <param name="min_z"                 value="$(arg min_z)"/>
     <param name="max_z"                 value="$(arg max_z)"/>
     
-    <!-- Ego bounds는 필요시만 오버라이드 -->
-    <!--
+    <!-- Ego vehicle bounds -->
     <param name="ego_min_x"             value="$(arg ego_min_x)"/>
     <param name="ego_max_x"             value="$(arg ego_max_x)"/>
     <param name="ego_min_y"             value="$(arg ego_min_y)"/>
     <param name="ego_max_y"             value="$(arg ego_max_y)"/>
     <param name="ego_min_z"             value="$(arg ego_min_z)"/>
     <param name="ego_max_z"             value="$(arg ego_max_z)"/>
-    -->
   </node>
 
 </launch>

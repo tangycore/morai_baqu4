@@ -40,9 +40,16 @@ LidarClusterNode::LidarClusterNode() : pnh_("~")
     ROS_INFO("=== LiDAR Cluster Node with Tracking Initialized ===");
     ROS_INFO("Subscribing to: %s", lidar_topic_.c_str());
     ROS_INFO("Output frame: %s", output_frame_.c_str());
-    ROS_INFO("Cluster tolerance: %.2f", clustering_params_.tolerance);
+    ROS_INFO("Cluster tolerance: %.2f m", clustering_params_.tolerance);
     ROS_INFO("Cluster size: [%d, %d]", clustering_params_.min_size, clustering_params_.max_size);
     ROS_INFO("Filter distance: %.1f m", filtering_params_.max_distance);
+    ROS_INFO("Filter X: [%.1f, %.1f] m", filtering_params_.min_x, filtering_params_.max_x);
+    ROS_INFO("Filter Y: [%.1f, %.1f] m", filtering_params_.min_y, filtering_params_.max_y);
+    ROS_INFO("Filter Z: [%.1f, %.1f] m", filtering_params_.min_z, filtering_params_.max_z);
+    ROS_INFO("Ego bounds: X[%.1f, %.1f], Y[%.1f, %.1f], Z[%.1f, %.1f]",
+             ego_bounds_.min_x, ego_bounds_.max_x,
+             ego_bounds_.min_y, ego_bounds_.max_y,
+             ego_bounds_.min_z, ego_bounds_.max_z);
 }
 
 void LidarClusterNode::loadParameters()
@@ -53,19 +60,20 @@ void LidarClusterNode::loadParameters()
     pnh_.param<std::string>("cluster_result_topic", cluster_result_topic_, "cluster_result");
     
     // Clustering parameters
-    pnh_.param<float>("cluster_tolerance", clustering_params_.tolerance, 0.5f);
+    pnh_.param<float>("cluster_tolerance", clustering_params_.tolerance, 0.7f);
     pnh_.param<int>("min_cluster_size", clustering_params_.min_size, 20);
-    pnh_.param<int>("max_cluster_size", clustering_params_.max_size, 25000);
+    pnh_.param<int>("max_cluster_size", clustering_params_.max_size, 8000);
     
     // Filtering parameters
-    pnh_.param<float>("max_distance", filtering_params_.max_distance, 50.0f);
-    pnh_.param<float>("min_x", filtering_params_.min_x, 1.0f);
-    pnh_.param<float>("min_y", filtering_params_.min_y, -5.0f);
-    pnh_.param<float>("max_y", filtering_params_.max_y, 5.0f);
-    pnh_.param<float>("min_z", filtering_params_.min_z, -2.0f);
-    pnh_.param<float>("max_z", filtering_params_.max_z, -0.5f);
+    pnh_.param<float>("max_distance", filtering_params_.max_distance, 60.0f);
+    pnh_.param<float>("min_x", filtering_params_.min_x, 0.0f);
+    pnh_.param<float>("max_x", filtering_params_.max_x, 60.0f);
+    pnh_.param<float>("min_y", filtering_params_.min_y, -3.5f);
+    pnh_.param<float>("max_y", filtering_params_.max_y, 3.5f);
+    pnh_.param<float>("min_z", filtering_params_.min_z, 0.1f);
+    pnh_.param<float>("max_z", filtering_params_.max_z, 3.0f);
     
-    // Ego vehicle bounds (optional override)
+    // Ego vehicle bounds
     pnh_.param<float>("ego_min_x", ego_bounds_.min_x, -1.0f);
     pnh_.param<float>("ego_max_x", ego_bounds_.max_x, 4.7f);
     pnh_.param<float>("ego_min_y", ego_bounds_.min_y, -1.0f);
@@ -110,7 +118,7 @@ void LidarClusterNode::lidarCallback(const sensor_msgs::PointCloud2ConstPtr& clo
     if (cluster_indices.empty())
     {
         ROS_INFO("No clusters found");
-        return;
+        // Empty detection message still goes to tracker
     }
     
     // 4. Create 3D detections
@@ -132,7 +140,7 @@ void LidarClusterNode::lidarCallback(const sensor_msgs::PointCloud2ConstPtr& clo
         createBoundingBox(detections3d_msg, cluster_cloud);
     }
     
-    // 5. Update tracker (assign stable IDs)
+    // 5. Update tracker (assign stable IDs + add lost tracks)
     tracker_.update(detections3d_msg, cloud_msg->header.stamp.toSec());
     
     // 6. Create visualization markers
@@ -148,7 +156,8 @@ void LidarClusterNode::lidarCallback(const sensor_msgs::PointCloud2ConstPtr& clo
     cluster_cloud_msg.header = detections3d_msg.header;
     cluster_cloud_pub_.publish(cluster_cloud_msg);
     
-    ROS_INFO("Published %lu tracked clusters", detections3d_msg.detections.size());
+    ROS_INFO("Published %lu total detections (including lost tracks)", 
+             detections3d_msg.detections.size());
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr LidarClusterNode::downsampleCloudMsg(
@@ -163,15 +172,18 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr LidarClusterNode::downsampleCloudMsg(
     {
         auto const& point = cloud->points[i];
         float const squared_distance = std::pow(point.x, 2) + std::pow(point.y, 2) + std::pow(point.z, 2);
-        
+        bool is_front_critical = (point.x > ego_bounds_.max_x && point.x < 20.0f && std::abs(point.y) < 1.5f);
+        float min_z_check = is_front_critical ? -0.2f : filtering_params_.min_z;
         // Filter out: ego vehicle, out of range, out of bounds
         if (ego_bounds_.contains(point) ||
             squared_distance > max_squared_distance || 
             point.x < filtering_params_.min_x ||
+            point.x > filtering_params_.max_x ||
             point.y < filtering_params_.min_y ||
             point.y > filtering_params_.max_y ||  
             point.z > filtering_params_.max_z || 
-            point.z < filtering_params_.min_z)
+            point.z < filtering_params_.min_z ||
+            point.z < min_z_check)
         {
             cloud->points[i] = cloud->points[cloud->points.size() - 1];
             cloud->points.resize(cloud->points.size() - 1);
@@ -179,7 +191,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr LidarClusterNode::downsampleCloudMsg(
         }
     }
     
-    ROS_INFO("Downsampled cloud size: %lu", cloud->points.size());
+    ROS_INFO("Filtered cloud: %lu points", cloud->points.size());
     return cloud;
 }
 
@@ -311,7 +323,7 @@ visualization_msgs::MarkerArray LidarClusterNode::createMarkerArray(
             visualization_msgs::Marker marker;
             marker.header = detections3d_msg.header;
             marker.ns = "clusters";
-            marker.id = det.results[0].id;  // Use stable ID from tracker
+            marker.id = det.results[0].id;
             marker.type = visualization_msgs::Marker::CUBE;
             marker.action = visualization_msgs::Marker::ADD;
             marker.pose = det.bbox.center;
@@ -319,10 +331,12 @@ visualization_msgs::MarkerArray LidarClusterNode::createMarkerArray(
             marker.scale.y = det.bbox.size.y;
             marker.scale.z = det.bbox.size.z;
             
+            // Color based on score (lost tracks are dimmer)
+            float score = det.results[0].score;
             marker.color.r = 0.0;
             marker.color.g = 1.0;
             marker.color.b = 0.0;
-            marker.color.a = 0.5;
+            marker.color.a = 0.3 + 0.5 * score;  // Lost tracks fade out
             
             marker.lifetime = ros::Duration(duration * 2);
             marker_array.markers.push_back(marker);
@@ -331,7 +345,7 @@ visualization_msgs::MarkerArray LidarClusterNode::createMarkerArray(
             visualization_msgs::Marker text_marker;
             text_marker.header = detections3d_msg.header;
             text_marker.ns = "cluster_ids";
-            text_marker.id = det.results[0].id;  // Use stable ID from tracker
+            text_marker.id = det.results[0].id;
             text_marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
             text_marker.action = visualization_msgs::Marker::ADD;
             text_marker.pose = det.bbox.center;
@@ -341,7 +355,12 @@ visualization_msgs::MarkerArray LidarClusterNode::createMarkerArray(
             text_marker.color.g = 1.0;
             text_marker.color.b = 1.0;
             text_marker.color.a = 1.0;
-            text_marker.text = "ID " + std::to_string(det.results[0].id);
+            
+            // Show ID and score
+            std::stringstream ss;
+            ss << "ID " << det.results[0].id << " (" << std::fixed << std::setprecision(2) << (score * 100) << "%)";
+            text_marker.text = ss.str();
+            
             text_marker.lifetime = ros::Duration(duration * 2);
             marker_array.markers.push_back(text_marker);
         }

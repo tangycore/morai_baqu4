@@ -32,7 +32,7 @@ class EgoControlPub :
         self.vehicle_yaw = 0.0
 
         # PID 게인을 m/s 기준으로 재튜닝
-        self.pid = PIDController(0.88, 0.182, 1.08)
+        self.pid = PIDController(0.68, 0.152, 1.08)
         self.pure_pursuit = PurePursuit(3.0, np.deg2rad(40), 0.5, 5)
         
         rospy.Subscriber("/opt_path", Path, self.path_callback)

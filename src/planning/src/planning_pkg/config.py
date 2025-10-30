@@ -8,7 +8,7 @@ class DrivingMode(Enum):
     FOLLOWING = 4
 
 # common config
-GEN_T_STEP = 0.05
+GEN_T_STEP = 0.1
 
 # lateral final state position config
 DT_0_MIN = -3.5
@@ -43,9 +43,9 @@ SHOW_OPT_PATH = True
 SHOW_VALID_PATH = True
 
 # cost config
-K_J   = 0.1 # jerk config
-K_T   = 100 # time cost config (얼마나 빠르게 도달 할건지)
-K_D   = 150.0 # lateral cost config
+K_J   = 0.02 # jerk config
+K_T   = 50 # time cost config (얼마나 빠르게 도달 할건지)
+K_D   = 40.0 # lateral cost config
 K_S   = 1.0 # longitunial cost config
 
 K_LAT = 1.0 # lateral cost config when combine lateral and longitunial traj
@@ -58,7 +58,7 @@ FINAL_DESIRED_SPEED = 20 # 현재 차량이 최고 도달 할 수 있는 속도
 # 속도, 가속도, 곡률 최대값
 V_MAX = 12
 ACC_MAX = 7
-K_MAX = 20
+K_MAX = 30
 LAT_ACCEL_MAX = 4.0  # allowable lateral acceleration (m/s^2) for curvature-based speed limiting
 
 # Car config

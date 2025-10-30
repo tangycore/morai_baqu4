@@ -69,9 +69,9 @@ private:
   float ego_min_z_, ego_max_z_;
   
   // Marker parameters
-  float marker_size_x_;
-  float marker_size_y_;
-  float marker_size_z_;
+  // float marker_size_x_;
+  // float marker_size_y_;
+  // float marker_size_z_;
   
   ros::Time last_call_time_;
 
@@ -104,9 +104,9 @@ public:
     pnh_.param<float>("ego_max_z", ego_max_z_, 2.0);
     
     // Marker parameters
-    pnh_.param<float>("marker_size_x", marker_size_x_, 1.0);
-    pnh_.param<float>("marker_size_y", marker_size_y_, 1.0);
-    pnh_.param<float>("marker_size_z", marker_size_z_, 1.0);
+    // pnh_.param<float>("marker_size_x", marker_size_x_, 1.0);
+    // pnh_.param<float>("marker_size_y", marker_size_y_, 1.0);
+    // pnh_.param<float>("marker_size_z", marker_size_z_, 1.0);
     
     // Publishers
     cluster_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("cluster_cloud", 1);
@@ -394,10 +394,10 @@ public:
         marker.type = visualization_msgs::Marker::CUBE;
         marker.action = visualization_msgs::Marker::ADD;
         marker.pose = det.bbox.center;
-        marker.scale.x = marker_size_x_;
-        marker.scale.y = marker_size_y_;
-        marker.scale.z = marker_size_z_;
-        
+        marker.scale.x = det.bbox.size.x;
+        marker.scale.y = det.bbox.size.y;
+        marker.scale.z = det.bbox.size.z;
+    
         // Color: Green (cluster)
         marker.color.r = 0.0;
         marker.color.g = 1.0;
