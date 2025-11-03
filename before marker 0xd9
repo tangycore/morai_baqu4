@@ -1,0 +1,1517 @@
+[33mcommit 26cc5499635c9c456fda849a6391af2b2ade4f02[m[33m ([m[1;36mHEAD -> [m[1;32mros1-local[m[33m, [m[1;31morigin/ros1-local[m[33m)[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Oct 31 06:00:34 2025 +0900
+
+    feat: red-arrow is red
+
+[33mcommit 88d9f65432fe2d38b55fb2b6dc65f04d0159c494[m[33m ([m[1;31morigin/ai[m[33m)[m
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Fri Oct 31 05:29:32 2025 +0900
+
+    Update README.md
+
+[33mcommit 01a9370f3b76834d51ebf54d1587da6ce3d0d962[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Fri Oct 31 05:27:46 2025 +0900
+
+    Tune obstacle ROI and red-light stopping safety
+
+[33mcommit 248bdd0677d100a60cc1bcedfdd68def02f4d103[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Oct 31 05:23:18 2025 +0900
+
+    upgrade: yolo pt file
+
+[33mcommit 1faeeb38f6bcc1dd5103e944a5813c4e29bb1331[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Oct 31 05:22:45 2025 +0900
+
+    upgrade: yolo pt file
+
+[33mcommit 2515e2689cc4a44d22f06d8d3096fcf02b7e4389[m[33m ([m[1;31mjhk00/main[m[33m)[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Oct 31 04:45:37 2025 +0900
+
+    hotfix: change int type to bool
+
+[33mcommit 07c7020b000223ea8bbaf77c6f15abba88090a48[m
+Merge: ecb6b6a ea7277e
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Oct 31 04:36:03 2025 +0900
+
+    Merge branch 'ros1-local' of github.com:baqu4-2025-driverless/baqu4_morai_ws into ros1-local
+
+[33mcommit ea7277e6af8909e45fcadcde14bf681cb6848949[m
+Author: jh <sokjh1310@naver.com>
+Date:   Fri Oct 31 04:31:46 2025 +0900
+
+    finfinal
+
+[33mcommit da3d0db320e7786c5997cd7b55a679fa25b8bcb5[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 04:22:38 2025 +0900
+
+    Restrict obstacle ROI to central lane band
+
+[33mcommit bf8e487e5303180493c8dcce04e5ce76e8ab1e03[m
+Author: jh <sokjh1310@naver.com>
+Date:   Fri Oct 31 04:21:58 2025 +0900
+
+    final
+
+[33mcommit 341766bf057f7f9e09aa90686eef5d3b17537b8c[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 04:07:25 2025 +0900
+
+    Implement ROI-based obstacle detector
+
+[33mcommit ecb6b6a20582886d9535ce72eac5727d24b83bb3[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Oct 31 03:31:08 2025 +0900
+
+    feat: create a sequence between traffic_light and stop_line
+
+[33mcommit 573598225f6ce458ef0c6254e379a3cb0fdde988[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 02:36:14 2025 +0900
+
+    Adjust speed sign targets to 21/31/41
+
+[33mcommit 7b8c757234b4b76718ac083f92c7ffcb1e499176[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Fri Oct 31 02:13:13 2025 +0900
+
+    메시지
+
+[33mcommit 1cb86da6b2983d8d96162ceb26dfed4dbef98f2c[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Fri Oct 31 02:13:13 2025 +0900
+
+    메시지
+
+[33mcommit 9e2a76edad99c525b70cf3147ea5e5a6d3121575[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Fri Oct 31 02:13:13 2025 +0900
+
+    메시지
+
+[33mcommit cbbd1cae9e0aad5b5f0bf82b78b089ace99f9326[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Fri Oct 31 01:35:01 2025 +0900
+
+    delay
+
+[33mcommit 3a0fff0a5e9a105e52eaab90b76955fdb2c15262[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 01:32:37 2025 +0900
+
+    Retune speed defaults and traffic light overlay
+
+[33mcommit 177c09995c6cdc7e6373fb142e24010459169407[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Oct 31 01:08:26 2025 +0900
+
+    feat: complete to make stop_line_detection, traffic_light_detection seperatly
+
+[33mcommit ca76cb0ac51466886cdd6b4751b0b16192aa11ad[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Fri Oct 31 01:05:00 2025 +0900
+
+    원하는 메시지
+
+[33mcommit fb4251ba4ddf9585a8119a4c27419a7108f65197[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Fri Oct 31 00:02:15 2025 +0900
+
+    ...
+
+[33mcommit 68adef01c41d99372bb48ed8f19d5b2214b3dadc[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 00:57:06 2025 +0900
+
+    Remove obstacle speed cap
+
+[33mcommit 7ab82bea30129593bd451b143d2889959c08eceb[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 00:55:51 2025 +0900
+
+    Hold last detected speed limit across flicker
+
+[33mcommit 89c0b4931a8938accb4d27759096f989ed574fba[m
+Author: jh <sokjh1310@naver.com>
+Date:   Fri Oct 31 00:48:00 2025 +0900
+
+    clustering tracker
+
+[33mcommit 3922d88f28b5d898226b9607478c25ed509ecdde[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 00:26:29 2025 +0900
+
+    Allow runtime tuning of obstacle thresholds
+
+[33mcommit 0a57985d49fea22d6adb00db3f5bbfcb99c99575[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Fri Oct 31 00:26:29 2025 +0900
+
+    Allow runtime tuning of obstacle thresholds
+
+[33mcommit 72270f98d5e35d27767a9dbbcc9a64d6b8c28107[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Thu Oct 30 23:59:54 2025 +0900
+
+    feat: stop line visualization
+
+[33mcommit ed6caf8f1622c50e8509de6b3670a1afa1ffab29[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 23:49:25 2025 +0900
+
+    Latch traffic light state until green
+
+[33mcommit 23622bf6e6d665dc2bbefaed50cdb095062a44d3[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Thu Oct 30 23:45:39 2025 +0900
+
+    feat: init stop_sequence
+
+[33mcommit a9d467a4e6aeda7e92e6924add56d8b62fccb7da[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 23:39:51 2025 +0900
+
+    Latch stop-lines until traffic light turns green
+
+[33mcommit 2b07b027007a626d933d4024c43b2a95cf676457[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 23:11:43 2025 +0900
+
+    Increase obstacle-based steering override
+
+[33mcommit 021aad37205af29eb56e41b60bbd7900017724bf[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 23:04:58 2025 +0900
+
+    Gate stop-line detection on red/yellow lights
+
+[33mcommit 5839b0844cb70a265c8581231cb905a0374aa690[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 22:58:01 2025 +0900
+
+    Adjust speed limits and ignore pedestrian lights
+
+[33mcommit 307a010c7b82db6252795687308928d5c90b5cb5[m[33m ([m[1;31morigin/final[m[33m, [m[1;32mfinal[m[33m)[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 30 21:47:57 2025 +0900
+
+    final network setting
+
+[33mcommit 756b128b6a49d8179f6ebe6b81e363401764e2a7[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 21:30:49 2025 +0900
+
+    Ignore external directory
+
+[33mcommit 43f731bd064d8d1aeb068e8cfbb935d6b407f8ab[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 20:10:03 2025 +0900
+
+    Refactor MORAI UDP stack and remove external assets
+
+[33mcommit c2702252f3ed862225ecd452174c6e8d8988dbac[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 19:04:16 2025 +0900
+
+    Update README.md
+
+[33mcommit a15ab18f2693fa4e404f16d91500abac326f1770[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 19:02:07 2025 +0900
+
+    Restructure workspace: fix nested catkin_ws and cleanup
+
+[33mcommit fa5ff69f783c28ee86628aead6822be7078b9755[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 18:39:07 2025 +0900
+
+    Remove SSH private key and update .gitignore
+
+[33mcommit b3bd200d6e4c53097bbc894a87c482b406fd786b[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 18:35:29 2025 +0900
+
+    Remove large .cache files and ignore cache directory
+
+[33mcommit 9715856f7e3109e5b76ad6e30e173e1956632319[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 18:32:56 2025 +0900
+
+    Remove large cache files and update .gitignore
+
+[33mcommit 56feafa0124e780e120e2be22661baf30e33fddd[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 18:25:00 2025 +0900
+
+    AI미션팀 덮어쓰기
+
+[33mcommit 7eb9dff8d260c123f3a9a5f14bd240432aaab853[m
+Merge: 54dd96b 21e31c0
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 18:11:05 2025 +0900
+
+    difm
+
+[33mcommit 5e2aefe37f344b60a5766c20393b6ff2196608c2[m
+Merge: f8fc447 14d43c0
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 18:11:05 2025 +0900
+
+    difm
+
+[33mcommit 54dd96b61cc0c646e808b46c28d1c9ae047028e3[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 18:01:15 2025 +0900
+
+    cam_udp+
+
+[33mcommit f8fc447a52708c78d0f0c623db77b746c0d08415[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 18:01:15 2025 +0900
+
+    cam_udp+
+
+[33mcommit 21e31c0e43227cba82ae6d827982a9e0e8d53121[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 17:41:36 2025 +0900
+
+    Integrate obstacle YOLO detector and remove dataset artifacts
+
+[33mcommit 14d43c01f22ef95bedca73d4c28621535111254b[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 17:41:36 2025 +0900
+
+    Integrate obstacle YOLO detector and remove dataset artifacts
+
+[33mcommit b4b8a78dd583a482da566a9530ac060c9833397d[m
+Merge: 2f6e996 657d7a1
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 13:38:08 2025 +0900
+
+    Merge remote-tracking branch 'upstream/main' into main
+
+[33mcommit 50a6f6a9d48940c3884efb08b91a6014bbde2b9e[m
+Merge: c97155d 17d8ecf
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 13:38:08 2025 +0900
+
+    Merge remote-tracking branch 'upstream/main' into main
+
+[33mcommit 657d7a1eadb202fc89c55e916edd617ed8333ed8[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 13:36:52 2025 +0900
+
+    메시지
+
+[33mcommit 17d8ecf220fbeb7d4596db3963838d5a09007996[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 13:36:52 2025 +0900
+
+    메시지
+
+[33mcommit 2f6e9960977ca0809de96d325f14d9c9a6ecccbd[m
+Merge: 38d846a 08f6866
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 13:31:48 2025 +0900
+
+    Merge remote-tracking branch 'upstream/main' into main
+
+[33mcommit c97155d276f07688eef937300272d24cb5804fd7[m
+Merge: 2f1a102 2ff7fd8
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 13:31:48 2025 +0900
+
+    Merge remote-tracking branch 'upstream/main' into main
+
+[33mcommit 38d846a8212964bbb5ed1af58067b4a783bb1034[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 13:31:33 2025 +0900
+
+    UDP_PORT
+
+[33mcommit 2f1a1024397db93dd33c01e65afeafe57f97a853[m
+Author: minsungk02 <minsungk0426@naver.com>
+Date:   Thu Oct 30 13:31:33 2025 +0900
+
+    UDP_PORT
+
+[33mcommit 08f6866ecd94ab8446f7126b199f1f117d4b5b72[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 13:16:38 2025 +0900
+
+    Update YOLO dataset pipeline and cruise speed defaults
+
+[33mcommit 2ff7fd88bce2b89a8359e6798c5c43c95b82cef1[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 13:16:38 2025 +0900
+
+    Update YOLO dataset pipeline and cruise speed defaults
+
+[33mcommit 429afc3c0a5ca202e9d7988527f09fb0be2884eb[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:55:01 2025 +0900
+
+    Add files via upload
+
+[33mcommit c3ddc6541d991b0652f128e7f69446b7d5aaf42e[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:55:01 2025 +0900
+
+    Add files via upload
+
+[33mcommit ac5e50eb087b985e7717b12b863c03a2001da030[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:54:30 2025 +0900
+
+    Add files via upload
+
+[33mcommit 56c4dae849e1c9be0201391c9527f4f1591aa044[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:54:30 2025 +0900
+
+    Add files via upload
+
+[33mcommit 9d9cb04f4c7ece53834cea2bf5c6da277573c062[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:53:05 2025 +0900
+
+    Remove orange dataset and fix darknet_ros submodule issue
+
+[33mcommit acffcd97111169e54f1826fbc9f9c08c54dd90b8[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:53:05 2025 +0900
+
+    Remove orange dataset and fix darknet_ros submodule issue
+
+[33mcommit 7fa723d11c89dcad01f1c0894a8cc294b355fad3[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 30 12:51:01 2025 +0900
+
+    fix cluster param
+
+[33mcommit 6cad2f86048816fc186d9970b4bb3000c2274463[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:45:19 2025 +0900
+
+    Add files via upload
+
+[33mcommit ecef0a392897e062b55e070366ba12e0b896158b[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:45:19 2025 +0900
+
+    Add files via upload
+
+[33mcommit cff275185504105f16858b6ceee0cdcb30729c80[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:43:33 2025 +0900
+
+    Add files via upload
+
+[33mcommit 3f05017270ec3ab3f5cd7612ba10088c6dc2b97d[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 12:43:33 2025 +0900
+
+    Add files via upload
+
+[33mcommit 77150006867504981d67859b2fe0da68e3acdd11[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 30 11:51:44 2025 +0900
+
+    fix clustering tf
+
+[33mcommit bf98cd114ce0aa62e9eed7e68aa5611efd654072[m
+Merge: 1a728b6 46dbcd4
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Thu Oct 30 11:46:09 2025 +0900
+
+    1ST
+
+[33mcommit ac9f19c137852ecb38c73a07baaa8d4675b9642a[m
+Merge: ca9c578 bad2fa7
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Thu Oct 30 11:46:09 2025 +0900
+
+    1ST
+
+[33mcommit 1a728b68e9b881384e363b2fa441d5c4f243065a[m
+Merge: f868061 77440f6
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Thu Oct 30 11:36:00 2025 +0900
+
+    작업 저장
+
+[33mcommit ca9c578f36692d73cb53ce87ee2163626849a162[m
+Merge: 66b81ce 8c73005
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Thu Oct 30 11:36:00 2025 +0900
+
+    작업 저장
+
+[33mcommit 46dbcd42aa6a5c7f22896200460de0b580906461[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:31:36 2025 +0900
+
+    Adjust default cruise speed to 30 kph
+
+[33mcommit bad2fa7ed6b94ad902643d5eb13aca9ca637b49c[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:31:36 2025 +0900
+
+    Adjust default cruise speed to 30 kph
+
+[33mcommit 8fd7d144e6b65e0a8b17f0f61ef00931082882b2[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:26:45 2025 +0900
+
+    Adjust default cruise speed to 30 kph
+
+[33mcommit a425d453dc1108a47861b9bb213fc4fdca35fe84[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:26:45 2025 +0900
+
+    Adjust default cruise speed to 30 kph
+
+[33mcommit 3807e8ff55cfb1a31e77a6b4056a576109bbec7f[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:11:23 2025 +0900
+
+    Add files via upload
+
+[33mcommit 0490438c2400f12cddbc4071bb818d0b072f8273[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:11:23 2025 +0900
+
+    Add files via upload
+
+[33mcommit ab3c6860fb70078057431770d4564d103a54390e[m
+Author: Jason Na <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:00:25 2025 +0900
+
+    Add obstacle_yolov11 training scripts (external/obstacle_yolov11)
+
+[33mcommit cebf7460ca9a8ea2e61fca4aad687c3508ace170[m
+Author: Jason Na <skgudtjs1@gmail.com>
+Date:   Thu Oct 30 11:00:25 2025 +0900
+
+    Add obstacle_yolov11 training scripts (external/obstacle_yolov11)
+
+[33mcommit 11afcfd674fca0ecebd930533b538036e219ac64[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 30 10:23:53 2025 +0900
+
+    feat: clustering visual
+
+[33mcommit e3270d6160460756e2f4dc735b06a2db91702aaf[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 30 00:36:49 2025 +0900
+
+    remove livox lidar package
+
+[33mcommit 25053d754909b67181279f7256e4ea9a1a627314[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 30 00:22:21 2025 +0900
+
+    fix : use sideslip angle in gps-black out field
+
+[33mcommit f868061cd50b760235df04167b00f5b8cc8842b7[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 20:46:28 2025 +0900
+
+    작업 저장
+
+[33mcommit 66b81ce3e35a9fa0e21c4d272630c61b5f6bd2ed[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 20:46:28 2025 +0900
+
+    작업 저장
+
+[33mcommit 8e3267e0cf82e7f6296a8a0d26f7cd12d0a97e79[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Wed Oct 29 20:13:46 2025 +0900
+
+    feat(odom): 음영구역
+
+[33mcommit 9ab17d4a585ba21d39475c404ccb2cc79ac68723[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Oct 29 19:40:18 2025 +0900
+
+    Add obstacle topic, debugger
+
+[33mcommit 77440f6832f99875ce713485e82d98b8aabe99ca[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 19:33:47 2025 +0900
+
+    Integrate YOLO speed sign and traffic light controls
+
+[33mcommit 8c7300502579f1bb3dd98b6409b8f4fe5f603b73[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 19:33:47 2025 +0900
+
+    Integrate YOLO speed sign and traffic light controls
+
+[33mcommit fed9d834dc71a12f0e5350a53ed33d176bb6eee1[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 19:02:12 2025 +0900
+
+    Add YOLOv11 speed_sign
+
+[33mcommit afa9fe3b46ac2881156744ef52aee78f43784152[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 19:02:12 2025 +0900
+
+    Add YOLOv11 speed_sign
+
+[33mcommit ff972ec2b6766e851e6aa986895ded6933513edf[m
+Author: Jason Na <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 17:09:50 2025 +0900
+
+    Refine traffic light color detection (red/green states)
+
+[33mcommit 70cd989e26d32fb2556511ef916f481200a49039[m
+Author: Jason Na <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 17:09:50 2025 +0900
+
+    Refine traffic light color detection (red/green states)
+
+[33mcommit d97db62003e349df4749d4dfed1d833defb8ce89[m
+Merge: 6d9c7f1 eb5b67c
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 17:13:09 2025 +0900
+
+    Merge remote-tracking branch 'upstream/main' into main
+
+[33mcommit bf2c1256af84168737ad536b4b83f830a6c97033[m
+Merge: bae34fa 8461d1b
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 17:13:09 2025 +0900
+
+    Merge remote-tracking branch 'upstream/main' into main
+
+[33mcommit 6d9c7f147a0046954b27b0c7c68cf8f6bf1133f9[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 17:12:34 2025 +0900
+
+    신호등
+
+[33mcommit bae34fa64925e8241caaa55e2bad088344b847f2[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 17:12:34 2025 +0900
+
+    신호등
+
+[33mcommit 963bdd33a321c81d041d6484f4310d43f337e3cd[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Oct 29 16:54:55 2025 +0900
+
+    Add : gps blackout, network host port
+
+[33mcommit eb5b67cb010795ac1cc323e844c24a45ad517617[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 16:33:24 2025 +0900
+
+    feat: add lane marking detection and pure pursuit control
+
+[33mcommit 8461d1b49d9435371f0a703ddf5f23887c41453f[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 16:33:24 2025 +0900
+
+    feat: add lane marking detection and pure pursuit control
+
+[33mcommit f623b5a9e7bd9dadf991f6df9a03fe94afd9d1ed[m
+Merge: 5d31993 e349a1a
+Author: Jason Na <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 16:20:51 2025 +0900
+
+    Merge feature/tl-color
+
+[33mcommit 37e9e5d2c4611ecec128b1b121e9e37eb70995d3[m
+Merge: a9e0606 b2d98d2
+Author: Jason Na <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 16:20:51 2025 +0900
+
+    Merge feature/tl-color
+
+[33mcommit e349a1a268ac98a301563ab781416bb990c6fd90[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 16:04:28 2025 +0900
+
+    Add HSV-based traffic light detector (green)
+
+[33mcommit b2d98d28b62531f188722fc69829a6c2d9d97e73[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Wed Oct 29 16:04:28 2025 +0900
+
+    Add HSV-based traffic light detector (green)
+
+[33mcommit 5d31993ad0eafe44df5bccc4b8e082744e332a32[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 15:12:00 2025 +0900
+
+    Add workspace README
+
+[33mcommit a9e060661f8b24800870389d100f49f87008f4d4[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 15:12:00 2025 +0900
+
+    Add workspace README
+
+[33mcommit fb9ce1bef896926481b5406c90e68b2d38434fbc[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 14:37:32 2025 +0900
+
+    Add perception nodes for traffic lights, speed signs, and obstacles
+
+[33mcommit df3f2021fefd793acbc5ab2f198390fbd1f1cfe2[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 14:37:32 2025 +0900
+
+    Add perception nodes for traffic lights, speed signs, and obstacles
+
+[33mcommit cda835cd2edbb853bca88b91ac0f35ed68247816[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 14:26:04 2025 +0900
+
+    Refactor lane tracking into perception stack
+
+[33mcommit 1dd881651adf743550959df15c870f1e21bab77a[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Wed Oct 29 14:26:04 2025 +0900
+
+    Refactor lane tracking into perception stack
+
+[33mcommit dc7521c32d8825a1378270efad5b877cddbb7fa0[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Oct 28 16:45:10 2025 +0900
+
+    fix baqu4_tf  bug
+
+[33mcommit 7c7fdb104443a017eca76d9bde00083bd72216e4[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Oct 28 15:10:59 2025 +0900
+
+    remove slam
+
+[33mcommit bc42901ce08009f4471b68f08ff7df48d09880f8[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Oct 28 11:54:58 2025 +0900
+
+    Update README
+
+[33mcommit db9c3a3e3e73b435b34067ad0443ca9ec530810f[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Oct 28 11:44:32 2025 +0900
+
+    Refactor lidar clustering codes
+
+[33mcommit 4aeaff131f73fdb215dcc2fb15f05357ed934fbc[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Oct 28 11:18:43 2025 +0900
+
+    chore: add run.sh (core launches)
+
+[33mcommit 607ad4f48a0bc9e2864095c09b2827e3754ca461[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Mon Oct 27 15:04:41 2025 +0900
+
+    feat(planning): migrate to UDP and standardize message units for planning (kph(udp) -> mps(planning))
+
+[33mcommit ff1406edc6e52cf8d3268a32e9da8affd3caab0b[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Mon Oct 27 15:02:40 2025 +0900
+
+    chore(control): delete trash code
+
+[33mcommit 7f8aa6b33d7d63823e4e1f5bcabf0d9d334178f0[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Mon Oct 27 15:01:55 2025 +0900
+
+    chore: change rate hz 30 -> 60
+
+[33mcommit 14126e701dd01e83b4a2e80a4177ebf8f9e32a82[m
+Author: jh <sokjh1310@naver.com>
+Date:   Mon Oct 27 13:38:54 2025 +0900
+
+    Add network
+
+[33mcommit 941b563ee69a5eb531a6755b2c56468aad433b1a[m
+Author: jh <sokjh1310@naver.com>
+Date:   Mon Oct 27 00:14:55 2025 +0900
+
+    Update README
+
+[33mcommit cb7bdc5ff9836bc36dc33703bc1d636a37572b61[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Oct 26 21:11:09 2025 +0900
+
+    Update README
+
+[33mcommit ad0cae86766ae2a83b7fdf03dd987d08ae5d1603[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Oct 26 21:08:08 2025 +0900
+
+    Update README
+
+[33mcommit 0588bc3e1c822b9be093c748e94a68c77fc9919f[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Oct 26 14:55:54 2025 +0900
+
+    Update README
+
+[33mcommit a32a5eab03fa6079131071cbddaace8b3ccad9ef[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Oct 26 14:41:44 2025 +0900
+
+    Add Kalam-IOU tracker
+
+[33mcommit da7192365f92c3b49869fcbd6d2ba27c73fc5ef8[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Oct 26 01:12:39 2025 +0900
+
+    Add tracking
+
+[33mcommit 8980b02288feffaff37d1de6c8d4d87bf5c87ae9[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Oct 26 00:35:16 2025 +0900
+
+    Minor fix in clustering module
+
+[33mcommit 96d61861fb743831e5ea3bd4f528e6261c77f5a5[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 23:31:04 2025 +0900
+
+    Update README
+
+[33mcommit e63ad07c085b1d75f76a750b2737b8db29310129[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 23:29:36 2025 +0900
+
+    Update README
+
+[33mcommit 09f435e4e8ea682015a14d5d16acf7a26803a579[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 23:22:52 2025 +0900
+
+    Add submodules: FAST_LIO(main), livox_ros_driver(master), velodyne(master), vision_msgs(noetic-devel)
+
+[33mcommit e138ddf6ae042fa8dd03e5c40333d3da6a0c02b7[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 23:22:06 2025 +0900
+
+    cleanup broken fast_lio submodule add
+
+[33mcommit 7dea2e0bb2233882ba391fb2589a5a8f8dbdefdb[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 23:08:49 2025 +0900
+
+    Add Localization
+
+[33mcommit 16274a9cb47be8130abb9b63b2493999a5d17a4c[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 21:41:09 2025 +0900
+
+    Add lidar clustering
+
+[33mcommit 6efdd90039fee88347d0da90d79efb9badd9f061[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 16:55:52 2025 +0900
+
+    ctrl/status: auto-gear, auto-drive mode, status mapping, topic rename (ROS→UDP units not applied yet)
+
+[33mcommit 9d88d48c1b39cedb1e66af4dd7515074ee7dad68[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 25 00:30:33 2025 +0900
+
+    local path topic : /Ego_topic -> /morai/competition_status
+
+[33mcommit 83a2992c2f5e21e89c9ebdbbec019e0ebbe89883[m
+Author: jh <sokjh1310@naver.com>
+Date:   Fri Oct 24 23:12:41 2025 +0900
+
+    Update README
+
+[33mcommit 59a57ee73fa6c3767d2ba50da0fd14dd68ece349[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Fri Oct 24 13:13:05 2025 +0900
+
+    perf(control): tune PID gains
+
+[33mcommit ba4b893e9d3d299b952e5a3808bf3d582d8591e5[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Fri Oct 24 13:10:35 2025 +0900
+
+    feat(planning): slow down in curves
+
+[33mcommit 089280af4f11bd07aee40916ae07b2acb22894c9[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 14:30:44 2025 -0700
+
+    Mod CMakeList && packages
+
+[33mcommit ec6bccc84e3d3362a5f2f736b6ff67cb1c173758[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 14:16:56 2025 -0700
+
+    Mod EgoCtrlCmdNode: radian->-1~1 normalization
+
+[33mcommit 5966cd9d979a2ea30a7f10f373fd8204096da8b2[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 13:40:55 2025 -0700
+
+    Mod EgoCtrlCmdNode(topic by CtrlCmd)
+
+[33mcommit 999544c179f293497cd35490339353acea80398c[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 12:25:05 2025 -0700
+
+    Mod README.md
+
+[33mcommit 83f9526241cb4e4a36a1cead97a804550b321fe6[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 12:12:22 2025 -0700
+
+    Add ai_mission.launch
+
+[33mcommit 1d79154a9ec3021440085017c65f3142dce7ff79[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 12:09:18 2025 -0700
+
+    Add EgoCtrlCmdNode(test)
+
+[33mcommit 71ada7cc5c1c84d5d39706e5195bfa8b188e77c3[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 10:54:28 2025 -0700
+
+    Chore final_mission.launch && VehicleStatusNode.py
+
+[33mcommit 91cafd2c894ff7b50bc351351aac732ac37406cd[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 09:24:15 2025 -0700
+
+    Mod CollisionDataNode && CompetitionVehicleStatusNode && launch
+
+[33mcommit e9d28bf6232fece3a22f05eaa9f9ef1f1539f860[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Fri Oct 17 06:03:21 2025 -0700
+
+    Mod .gitmodules
+
+[33mcommit b6b3ca182f5ce26e14f98a3ce20d622dbbe5143a[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 16 23:22:42 2025 +0900
+
+    Add perception (DBSCAN planned)
+
+[33mcommit c5c28efa91ff3178f6c56cec3e6b82f6c14ed243[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Wed Oct 15 17:54:13 2025 +0900
+
+    Update README.md
+
+[33mcommit 2ba261dd2ff980ad14ef51cc67ef39cd4461d194[m
+Author: Han Pilho <58614643+ph-han@users.noreply.github.com>
+Date:   Wed Oct 15 17:00:33 2025 +0900
+
+    Update README.md
+
+[33mcommit e7296d069082cd93d726c9dbe208ae5ac3bab9f6[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Wed Oct 15 16:56:23 2025 +0900
+
+    chore(planning): write comment
+
+[33mcommit a6578d5969c9ec167e7a960ebc086a41a4a89219[m
+Author: Han Pilho <58614643+ph-han@users.noreply.github.com>
+Date:   Wed Oct 15 16:50:30 2025 +0900
+
+    Update README.md
+
+[33mcommit 4eb788f3e399857f5dcc97806c418788b468c51c[m
+Author: Han Pilho <58614643+ph-han@users.noreply.github.com>
+Date:   Wed Oct 15 16:48:27 2025 +0900
+
+    Update README.md
+
+[33mcommit da5c7e083a3baeac05cf67bb15df441bb1b15b7b[m
+Author: Han Pilho <58614643+ph-han@users.noreply.github.com>
+Date:   Wed Oct 15 16:47:46 2025 +0900
+
+    Update README.md
+
+[33mcommit d2150fb1c6ffb9c3df8d4d0d36d6ee5e202d4dab[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Wed Oct 15 16:45:18 2025 +0900
+
+    chore(planning, control): add README.md
+
+[33mcommit 490b77fe454740f3009a73c03b1daa32a1861ec3[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Wed Oct 15 15:57:24 2025 +0900
+
+    feat(control): change parameter
+
+[33mcommit 7f5a23cb88242ea87f1a8e665018e8a5adaea256[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Wed Oct 15 15:56:20 2025 +0900
+
+    feat(planning): add search window to world2frenet for fater coordinate conversion
+
+[33mcommit b6986a77dd701636864d0f3fba26c9815f89731d[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Tue Oct 14 12:05:08 2025 +0900
+
+    refector(planning): change global path publisher rate
+
+[33mcommit 55d3fa8b917149dcf3c721a885c68f0ef895815a[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sat Oct 11 17:53:21 2025 +0900
+
+    Refactor control package: remove duplicate path.launch
+
+[33mcommit 2f2dc68b9dd8123dd516331cdf9c7b074ee9df83[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Sat Oct 11 16:59:32 2025 +0900
+
+    feat(control): pure_pursuit + pid control
+
+[33mcommit 9dcfc7e46aa1d59bad2be437fdeabb8a396d1dff[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Sat Oct 11 16:56:03 2025 +0900
+
+    feat(planning): choose target speed and publish, tuning config
+
+[33mcommit 15cdaf71bba25cd8f701396859ce12e225579e2b[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Fri Oct 10 20:30:33 2025 +0900
+
+    fix(planning): fixed launch command error
+
+[33mcommit 6506ebe1c2de9917bbcde31d215b7d13f47bed9b[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Thu Oct 9 15:34:27 2025 +0900
+
+    feat(planning): set ego current position using odom topic
+
+[33mcommit 8417fe6f1b399f95e991de1ccf8c1c7e31757f94[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Thu Oct 9 15:18:09 2025 +0900
+
+    feat(planning): add planning launch file
+
+[33mcommit df5fbffa9545da35edc06de42c1d7436eea40e35[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Thu Oct 9 15:05:51 2025 +0900
+
+    chore(planning): add planning result visualization rviz
+
+[33mcommit d4adc951efbfe419fca39abc9c1c123f0365263c[m
+Author: ph-han <hanfeelhoo@naver.com>
+Date:   Thu Oct 9 14:22:02 2025 +0900
+
+    feat(planning): add planning ros pkg
+
+[33mcommit 6e36e857c8bf3fdbef6255fea514d7cb7fb09444[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Oct 9 01:17:24 2025 +0900
+
+    fix: topic name
+
+[33mcommit 83a0e16a5032f160346b3bed6b246d943120a9b0[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Oct 5 20:48:07 2025 +0900
+
+    add tf: odom, map
+
+[33mcommit 94f85448d7a9c17df368171e04f6b7db5781d3ce[m
+Author: jh <sokjh1310@naver.com>
+Date:   Fri Oct 3 00:16:39 2025 +0900
+
+    Add Controller & Global path
+
+[33mcommit c1790c843c6ebb2405e785422d88cebacbbfd692[m[33m ([m[1;32mmain[m[33m)[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Sep 28 23:35:39 2025 +0900
+
+    Remove SLAM & add UDP subscribers (CollisionData, CompetitionStatus)
+
+[33mcommit acf09a7841b2e24ebb90fd59dadfedafc6bd60ca[m
+Author: jh <sokjh1310@naver.com>
+Date:   Sun Sep 28 19:53:41 2025 +0900
+
+    Import src/baqu4_udp from origin/ros1-udp
+
+[33mcommit c1054fe658a65ec7c40562a5b15ae8ef9afa26cf[m[33m ([m[1;31morigin/ros1-udp[m[33m)[m
+Author: sukyun02 <sukyun02@hanyang.ac.kr>
+Date:   Thu Sep 25 18:33:02 2025 -0700
+
+    [Add]Udp Node && [Mod].gitignore
+
+[33mcommit d65c5dd65947fc55c8bb91acb3e5289b8d318eab[m
+Author: jh <sokjh1310@naver.com>
+Date:   Fri Sep 26 01:11:22 2025 +0900
+
+    catkin error
+
+[33mcommit aee19b7d6f5e83b4feffaba4d36d5bb7009730d1[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Sep 24 11:07:51 2025 +0900
+
+    Import src/slam from ros1-env @ d8ad750
+
+[33mcommit 3bec5b32bd1ed339c95990298d44c76345da3050[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Sep 17 23:07:24 2025 +0900
+
+    fix: dir typo, add odom
+
+[33mcommit 993dd09a630444ac320199079acf7ea7391853f2[m
+Merge: 80136de fceb3ee
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Wed Sep 17 22:03:46 2025 +0900
+
+    Merge pull request #2 from minsungk02/codex/implement-lane-tracking-in-ros-noetic
+    
+    Implement ROS lane tracking pipeline
+
+[33mcommit 765f6bcef5ac2d49d297982a0e8f5ad672ac245e[m
+Merge: 6047300 d44d69d
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Wed Sep 17 22:03:46 2025 +0900
+
+    Merge pull request #2 from minsungk02/codex/implement-lane-tracking-in-ros-noetic
+    
+    Implement ROS lane tracking pipeline
+
+[33mcommit fceb3eea245bd25f9ef52582b922951c62c1b2d1[m
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Wed Sep 17 22:02:15 2025 +0900
+
+    Implement ROS lane tracking pipeline
+
+[33mcommit d44d69d6dd0c52ab34d51fc15ce875e22865716f[m
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Wed Sep 17 22:02:15 2025 +0900
+
+    Implement ROS lane tracking pipeline
+
+[33mcommit cf7fd59649ac7699e2e5b287e2f86ea69ad15f81[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Sep 17 19:05:11 2025 +0900
+
+    update README
+
+[33mcommit 5adb82f58ae4bf56c42bc0f6c87ceb3899c83c61[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Sep 17 18:57:02 2025 +0900
+
+    feat: sensor TF integration
+
+[33mcommit 323e2ceb9d3db75b70749406ae266ae3da1068cb[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Sep 17 11:17:30 2025 +0900
+
+    feat: lidar-cam TF
+
+[33mcommit d8ad750483d25f044d7e29e81583bfeeafd7b9c9[m[33m ([m[1;31morigin/ros1-env[m[33m)[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Sun Sep 14 16:58:47 2025 +0900
+
+    Update README.md
+
+[33mcommit a5da37b6e782780c4f670d1876b830a7fe13fb8e[m[33m ([m[1;33mtag: v0.0.1[m[33m)[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Sun Sep 14 16:54:41 2025 +0900
+
+    Info: test success in local env
+
+[33mcommit ee91d3a9ffe097b1e0080e05f7b262c571b15f76[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Sun Sep 14 16:04:50 2025 +0900
+
+    Fin: Add glim module
+
+[33mcommit 80136de432752417b96dc434e40d093c7b3d0aff[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Sat Sep 13 17:50:08 2025 +0900
+
+    chore: add morai_msgs via git subtree (HEAD, squash)
+
+[33mcommit 604730010051ba15de5b18cc8f61055296b65379[m
+Merge: 1cc6c17 5222e79
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Sat Sep 13 17:50:04 2025 +0900
+
+    Merge commit '5222e79c3e0e53122d678e4dccd4787a15921bb7' as 'src/MORAI-ROS_morai_msgs'
+
+[33mcommit 5ca3baca156c44d09df01c2597373f91187043c9[m
+Merge: 42b9579 5222e79
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Sat Sep 13 17:50:04 2025 +0900
+
+    Merge commit '5222e79c3e0e53122d678e4dccd4787a15921bb7' as 'src/MORAI-ROS_morai_msgs'
+
+[33mcommit 5222e79c3e0e53122d678e4dccd4787a15921bb7[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Sat Sep 13 17:50:04 2025 +0900
+
+    Squashed 'src/MORAI-ROS_morai_msgs/' content from commit 6fd5332
+    
+    git-subtree-dir: src/MORAI-ROS_morai_msgs
+    git-subtree-split: 6fd53322f3c812f6818e00644da0d05fb3b50539
+
+[33mcommit 1cc6c171434bd1bae6e95c1cdf5f76a48fb3011e[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Sat Sep 13 17:48:26 2025 +0900
+
+    chore: remove morai_msgs submodule
+
+[33mcommit 42b957988f9f218f9375a58e7bf267e9322dbe99[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Sat Sep 13 17:48:26 2025 +0900
+
+    chore: remove morai_msgs submodule
+
+[33mcommit e091c1c392421612a4315c1b14151b64bae941e2[m
+Merge: 09a196e 4218761
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Sat Sep 13 17:25:16 2025 +0900
+
+    Merge pull request #1 from minsungk02/codex/create-lane-tracking-ros-node-in-python
+    
+    feat: add lane tracking node
+
+[33mcommit a939f93d1d6b933e27bb7b3bbfc09499d57360c4[m
+Merge: 09a196e 4218761
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Sat Sep 13 17:25:16 2025 +0900
+
+    Merge pull request #1 from minsungk02/codex/create-lane-tracking-ros-node-in-python
+    
+    feat: add lane tracking node
+
+[33mcommit 42187611f11b8384c1dd207bab7a7960a1674d6c[m
+Author: minsungkim <92711754+minsungk02@users.noreply.github.com>
+Date:   Sat Sep 13 17:24:38 2025 +0900
+
+    feat: add lane tracking node
+
+[33mcommit 09a196e44589407695222e8cb138c0758b86f739[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Fri Sep 12 18:40:29 2025 +0900
+
+    chore: add Kookmin contest repo snapshot under external/
+
+[33mcommit da6ead49fc3d9d41a075fa65f7077de1997c5223[m
+Merge: 5ea6db9 e3b0d44
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Fri Sep 12 18:33:20 2025 +0900
+
+    Merge commit 'e3b0d4481c3a2cc8ab437b77c1b8f0b2182436d3' as 'external/2025-kookmin-contest'
+
+[33mcommit e3b0d4481c3a2cc8ab437b77c1b8f0b2182436d3[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Fri Sep 12 18:33:20 2025 +0900
+
+    Squashed 'external/2025-kookmin-contest/' content from commit b79f4ef
+    
+    git-subtree-dir: external/2025-kookmin-contest
+    git-subtree-split: b79f4ef9b987fcafa8585af157ea63af38468a34
+
+[33mcommit 5ea6db9a8f999f9e3226f734811c96555b6cc33c[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Fri Sep 12 18:25:47 2025 +0900
+
+    chore: save local changes before subtree add
+
+[33mcommit 1602a3f5e8cbe16fa4e24301d8ffc67337523037[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Fri Sep 12 18:20:37 2025 +0900
+
+    for opencv
+
+[33mcommit d62ea5780ce48d594e733c85e44f8bdedfe010d9[m
+Author: minsungk02 <minsungk02@DESKTOP-1314PCN.localdomain>
+Date:   Fri Sep 12 18:16:55 2025 +0900
+
+    morai-ros-line tracking
+
+[33mcommit 8b1daa0214163ac17a067a25e5a1b5da84004ccb[m[33m ([m[1;31mjhk00/ros1-local[m[33m)[m
+Author: jhk00 <125166318+jhk00@users.noreply.github.com>
+Date:   Fri Sep 5 20:59:45 2025 +0900
+
+    Update README.md
+
+[33mcommit b124661df002b0e1d582ea7387c54de6998c2e36[m
+Author: jhk00 <125166318+jhk00@users.noreply.github.com>
+Date:   Fri Sep 5 20:55:10 2025 +0900
+
+    Update README.md
+
+[33mcommit 8a29e2d250a955dc0ac458f28bbdd063d8796d63[m
+Author: jhk00 <125166318+jhk00@users.noreply.github.com>
+Date:   Fri Sep 5 20:54:45 2025 +0900
+
+    Update README.md
+
+[33mcommit 8887b359cb2aa5cd9abc893d6fd187af125f7daf[m
+Author: jh <sokjh1310@naver.com>
+Date:   Fri Sep 5 20:51:37 2025 +0900
+
+    feat: enable IMU via ROS
+
+[33mcommit 19378d702cd822f49b33cc10a2281cb231f87ad9[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Sep 4 23:07:21 2025 +0900
+
+    feat(lidar): switch to nodelet manager
+
+[33mcommit ea0dc1720c4b47d8e5fbc4cb6f38b724caf5993b[m
+Author: jh <sokjh1310@naver.com>
+Date:   Thu Sep 4 21:24:27 2025 +0900
+
+    Add lidar viz launch
+
+[33mcommit ad61e9a0972701ff394eb50d42a7de02b01e2c63[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Thu Sep 4 14:35:47 2025 +0900
+
+    Modify: changes
+
+[33mcommit 98e81362ad6116da7fadae96f8e39434fada5323[m
+Author: jh <sokjh1310@naver.com>
+Date:   Wed Sep 3 18:00:11 2025 +0900
+
+    Remove rearLIDAR
+
+[33mcommit 7638f8980c553c55d3220c4ce061e776025ccc33[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Sep 2 22:37:26 2025 +0900
+
+    Update sensor.json
+
+[33mcommit ea09732e62c58a55268dc3b518ee5ed939708f45[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Tue Sep 2 16:47:35 2025 +0900
+
+    Add: morai_bringup as submodule
+
+[33mcommit 77864b977fd69d8c50585878ce00b39b999c9c60[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Tue Sep 2 16:34:29 2025 +0900
+
+    Add: morai_common as submodule
+
+[33mcommit d121585042b654aca34aa1903323514c7b953406[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Sep 2 14:40:11 2025 +0900
+
+    Update Camera coordinates in sensor.json
+
+[33mcommit bf22f02563b1bc1aac3639a6f41d255b3148612e[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Sep 2 13:17:58 2025 +0900
+
+    Update LIDAR coordinates
+
+[33mcommit 8540223a12a9cc1b57980696de5fcbd35ec59014[m
+Author: jh <sokjh1310@naver.com>
+Date:   Tue Sep 2 00:10:15 2025 +0900
+
+    Add Lidar
+
+[33mcommit b5711fdd6e8991e84897eff38f875a53f4d4047c[m
+Author: jh <sokjh1310@naver.com>
+Date:   Mon Sep 1 22:42:52 2025 +0900
+
+    Add initial sensor
+
+[33mcommit 68f9dea9584767a670a6448b25946f047c03f559[m
+Author: jihoon <sokjh1310@naver.com>
+Date:   Mon Sep 1 16:05:24 2025 +0900
+
+    Add local ROS1 workspace setup
+
+[33mcommit 4ed3cc9d7725b7e435f89dbea8e73e520912a003[m
+Merge: d2b639a 262a023
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Sun Aug 31 17:27:01 2025 +0900
+
+    Merge pull request #1 from baqu4-2025-driverless/fix/ros1-morai-msgs
+    
+    replace ROS2 msgs with ROS1 MORAI-ROS_morai_msgs (Noetic)
+
+[33mcommit 262a023cb5cc7a9c3982ec247c221a3fa1f5bb16[m[33m ([m[1;31morigin/fix/ros1-morai-msgs[m[33m)[m
+Author: hyeongseon <skgudtjs1@gmail.com>
+Date:   Sun Aug 31 17:25:30 2025 +0900
+
+    replace ROS2 msgs with ROS1 MORAI-ROS_morai_msgs (Noetic)
+
+[33mcommit a6d93b1a45c6629e901fc23d2ba5b0ac9a8e05c8[m[33m ([m[1;31morigin/ros1-ex[m[33m)[m
+Merge: 2d1841a 5205c1f
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Aug 29 03:27:13 2025 +0900
+
+    Merge remote-tracking branch 'origin/ros1-ex' into ros1-ex
+    Apply changes of README.md from origin/ros1-ex
+
+[33mcommit 2d1841aafb6f9e0a52c6c1e38f9a27110c0d184f[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Aug 29 03:25:07 2025 +0900
+
+    MODIFY: Adjust Dockerfile
+
+[33mcommit 5205c1f3109de587c0b93cc89b1a2301b811cb63[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Fri Aug 29 01:49:09 2025 +0900
+
+    Update README.md
+
+[33mcommit 45b96234b52abedeafe769af0740835bb2c655c9[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Aug 29 01:07:46 2025 +0900
+
+    ADD: GPU Calculation
+
+[33mcommit d9a9b1ca82f696fca70dec8c235f0c826863dec4[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Aug 29 00:58:11 2025 +0900
+
+    MODIFY: Adjust Dockerfile
+
+[33mcommit 3b86bfdb4b3d90d8246212c7fbd3c1963420f88d[m
+Merge: e4cf791 510773d
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Aug 29 00:50:08 2025 +0900
+
+    Merge remote-tracking branch 'origin/ros1-env' into ros1-ex
+
+[33mcommit 510773dd0f2285e576011d885c78d20ee2682078[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Fri Aug 29 00:47:31 2025 +0900
+
+    Update README.md
+
+[33mcommit e4cf791c6174e501b77c3c5b4f43b665fc33c2fe[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Fri Aug 29 00:29:35 2025 +0900
+
+    ADD: GPU Calculation
+
+[33mcommit 6e17367ae8fc89e06d8379df5016dad1165ef244[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Thu Aug 28 23:54:32 2025 +0900
+
+    Update README.md
+
+[33mcommit e4a317e59256c505dbc9169949cffd45e9f3c205[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Thu Aug 28 23:54:04 2025 +0900
+
+    Update README.md
+
+[33mcommit 70806411761ce88fbe70c6504bf415f89dbf5f41[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Wed Aug 27 14:45:01 2025 +0900
+
+    Update README.md
+
+[33mcommit 6e8afe398eb7e793b5c4b8ae62c2351e0572b24f[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Wed Aug 27 14:21:55 2025 +0900
+
+    Update README.md
+
+[33mcommit f552fd942e6d02189d2572ab28445ef0179c0a87[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Wed Aug 27 13:48:33 2025 +0900
+
+    Update README.md
+
+[33mcommit 54fa693ce77bf4ea80b0960a4f65424fa6d8d4ef[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Tue Aug 26 19:13:36 2025 +0900
+
+    Update README.md
+
+[33mcommit b742359323069b8012ee0253e8fc4058e0dfc3ff[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Tue Aug 26 19:02:11 2025 +0900
+
+    Modify: add port inform
+
+[33mcommit e91f909e1a75a0e4d923b3d998162bbe5163a0f9[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Thu Aug 21 11:34:47 2025 +0900
+
+    Update README.md
+
+[33mcommit c1495ab9fedb8184a2fc5dedde89155d75e96268[m
+Author: Sognare <90079601+BBAAMM@users.noreply.github.com>
+Date:   Thu Aug 21 01:46:29 2025 +0900
+
+    Update README.md
+
+[33mcommit 55da598ec982f297b1fbd3e3d13e2e4b3f58f912[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Thu Aug 21 01:45:24 2025 +0900
+
+    Migration complete
+
+[33mcommit af46835e91b3ad8b33126af9a995f4ac506f4676[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Thu Aug 21 01:08:31 2025 +0900
+
+    Clear: dump files
+
+[33mcommit fe58f77cc8756fd0bf237b3c7604de14cdc069f4[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Thu Aug 21 00:44:41 2025 +0900
+
+    Modify: to ros1 from ros2
+
+[33mcommit 4c25f28b35621644b102c136f31b4a77e61d8bc4[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Thu Aug 21 00:43:35 2025 +0900
+
+    Modify: to ros1 from ros2
+
+[33mcommit d2b639ab0b157d418fad81f374cb8fe3e27b488f[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Sat Aug 2 13:44:23 2025 +0900
+
+    chore: add .gitignore for build, install, log, cache
+
+[33mcommit 2ea3994acc3e348827dc6bc1e2c81d1e857da188[m
+Author: Ryu-ga <frech5679@icloud.com>
+Date:   Sat May 17 15:07:18 2025 +0900
+
+    Fix morai rc file
+
+[33mcommit ee5ad3a96b54196568c3c85c372ea72f168d4366[m
+Author: Ryu-ga <frech5679@icloud.com>
+Date:   Sat May 17 14:56:25 2025 +0900
+
+    Add build script
+
+[33mcommit 24034c95e0996ffdbb963512178f062e49e73f0b[m
+Author: Hyeong-Seon <skgudtjs1@gmail.com>
+Date:   Sat May 17 14:48:30 2025 +0900
+
+    Add morai micromamba init rc
+
+[33mcommit 01413f00ad907a98d0330c11e3ce2aca034217df[m
+Author: ksb <developer.ksb@gmail.com>
+Date:   Sat May 17 14:30:50 2025 +0900
+
+    Add: Ros2 msgs
+
+[33mcommit 939902806c248a379e0c448784d64c44e5d56aa8[m
+Author: Ryuga2967 <129831138+Ryuga2967@users.noreply.github.com>
+Date:   Sat May 17 14:22:17 2025 +0900
+
+    Initial commit

@@ -172,8 +172,8 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr LidarClusterNode::downsampleCloudMsg(
     {
         auto const& point = cloud->points[i];
         float const squared_distance = std::pow(point.x, 2) + std::pow(point.y, 2) + std::pow(point.z, 2);
-        bool is_front_critical = (point.x > ego_bounds_.max_x && point.x < 20.0f && std::abs(point.y) < 1.5f);
-        float min_z_check = is_front_critical ? -0.2f : filtering_params_.min_z;
+        //bool is_front_critical = (point.x > ego_bounds_.max_x && point.x < 20.0f && std::abs(point.y) < 1.5f);
+        //float min_z_check = is_front_critical ? -0.3f : filtering_params_.min_z;
         // Filter out: ego vehicle, out of range, out of bounds
         if (ego_bounds_.contains(point) ||
             squared_distance > max_squared_distance || 
@@ -182,8 +182,9 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr LidarClusterNode::downsampleCloudMsg(
             point.y < filtering_params_.min_y ||
             point.y > filtering_params_.max_y ||  
             point.z > filtering_params_.max_z || 
-            point.z < filtering_params_.min_z ||
-            point.z < min_z_check)
+            point.z < filtering_params_.min_z
+        )
+            //point.z < min_z_check)
         {
             cloud->points[i] = cloud->points[cloud->points.size() - 1];
             cloud->points.resize(cloud->points.size() - 1);

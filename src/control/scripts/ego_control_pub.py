@@ -7,6 +7,7 @@ from math import cos,sin,pi,sqrt,pow,atan2
 from geometry_msgs.msg import Point,PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry,Path
 from morai_msgs.msg import CtrlCmd
+from std_msgs.msg import Bool
 import numpy as np
 import tf
 from tf.transformations import euler_from_quaternion,quaternion_from_euler
@@ -29,6 +30,7 @@ class EgoControlPub :
         self.target_speed = 0
         self.is_path = False
         self.is_odom = False
+        self.is_stop = False
         self.vehicle_yaw = 0.0
 
         # PID 게인을 m/s 기준으로 재튜닝
@@ -38,6 +40,7 @@ class EgoControlPub :
         rospy.Subscriber("/opt_path", Path, self.path_callback)
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
         rospy.Subscriber("/plan_velocity_info", PlanVelocityInfo, self.plan_velocity_callback)
+        rospy.Subscriber("/stop_sequence/stop_decision", Bool, self.sign_callback)
 
         self.ctrl_cmd_pub = rospy.Publisher('/ctrl_cmd',CtrlCmd, queue_size=1)
         self.ctrl_cmd_msg = CtrlCmd()
@@ -52,15 +55,20 @@ class EgoControlPub :
 
                 curr_ego_state = (self.current_postion.x, self.current_postion.y, self.vehicle_yaw, self.current_speed)
                 steer_angle = self.pure_pursuit.steer_control(curr_ego_state, self.path)
-                self.target_speed = min(10, self.target_speed)
+                
                 # print(f"steer: {steer_angle}")
-                accel, brake, aout = self.pid.accel_control(self.current_speed, self.target_speed, 0.02)
+                
+                if not self.is_stop:
+                    self.target_speed = min(10, self.target_speed)
+                    accel, brake, aout = self.pid.accel_control(self.current_speed, self.target_speed, 0.02)
 
-                rospy.loginfo(f"{self.current_speed * 3.6:.2f}, {self.target_speed * 3.6:.2f} | "
-                            f"steer : {np.rad2deg(steer_angle):.2f}, accel: {accel:.3f}, brake: {brake:.3f}, aout: {aout:.3f}")
-
-                self.ctrl_cmd_msg.accel = accel
-                self.ctrl_cmd_msg.brake = brake
+                    rospy.loginfo(f"{self.current_speed * 3.6:.2f}, {self.target_speed * 3.6:.2f} | "
+                                f"steer : {np.rad2deg(steer_angle):.2f}, accel: {accel:.3f}, brake: {brake:.3f}, aout: {aout:.3f}")
+                    self.ctrl_cmd_msg.accel = accel
+                    self.ctrl_cmd_msg.brake = brake
+                else:
+                    self.ctrl_cmd_msg.accel = 0.0
+                    self.ctrl_cmd_msg.brake = 1.0
                 self.ctrl_cmd_msg.steering = steer_angle  # 라디안 그대로 전송 (ROS 규격)
                 self.ctrl_cmd_pub.publish(self.ctrl_cmd_msg)
             else:
@@ -70,6 +78,10 @@ class EgoControlPub :
                     rospy.logwarn_throttle(2.0, "[WARN] can't subscribe '/opt_path' topic...")
 
             rate.sleep()
+
+    def sign_callback(self, msg):
+        self.is_stop = msg.data
+
 
     def path_callback(self, msg):
         self.is_path=True

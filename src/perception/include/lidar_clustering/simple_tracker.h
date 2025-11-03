@@ -55,8 +55,8 @@ public:
           max_lost_frames_(8),              // 8프레임 (약 0.8초) 동안 유지
           history_size_(8),
           min_age_for_lost_track_(1),       // 최소 3프레임 이상 살아야 Lost Track 발행
-          min_score_for_lost_track_(0.6),   // 신뢰도 60% 이상만 발행
-          min_size_for_track_(0.05) {}      // 0.15m² 이상만 Track 생성
+          min_score_for_lost_track_(0.5),   // 신뢰도 60% 이상만 발행
+          min_size_for_track_(0.02) {}      // 0.15m² 이상만 Track 생성
     
     // IOU 계산 (2D bounding box)
     double computeIOU(const vision_msgs::Detection3D& det, const TrackedObject& track)
