@@ -164,13 +164,13 @@ class LocalPath:
 
             # Too long -> guardrail
             if length > 10.0:
-                rospy.logwarn(f"    -> FILTERED (too long, length={length:.1f}m)")
+                # rospy.logwarn(f"    -> FILTERED (too long, length={length:.1f}m)")
                 continue
             
             # Aspect ratio check
             aspect_ratio = length / (width + 1e-6)
             if aspect_ratio > 8.0:
-                rospy.logwarn(f"    -> FILTERED (elongated, ratio={aspect_ratio:.1f})")
+                # rospy.logwarn(f"    -> FILTERED (elongated, ratio={aspect_ratio:.1f})")
                 continue
             
             # 변환
@@ -409,7 +409,7 @@ class LocalPath:
             rospy.logwarn("No valid path.")
             self.no_valid_path_cnt += 1
             self.plan_velocity_info_msg.current_speed = self.ego_state.v 
-            self.plan_velocity_info_msg.target_speed = self.prev_opt_target_speed if self.no_valid_path_cnt <= 2 else 0
+            self.plan_velocity_info_msg.target_speed = self.prev_opt_target_speed if self.no_valid_path_cnt <= 3 else 0
             self.plan_velocity_info_msg.timestamp = rospy.Time.now().to_sec()
             return
         
@@ -445,7 +445,7 @@ class LocalPath:
         self.prev_opt_target_speed = self.plan_velocity_info_msg.target_speed
         
     def publish_path(self):
-        rate = rospy.Rate(10)  # 10Hz
+        rate = rospy.Rate(5)  # 10Hz
         while not rospy.is_shutdown():
             self.opt_local_path_msg.header.stamp = rospy.Time.now()
             self.update_frenet_state()

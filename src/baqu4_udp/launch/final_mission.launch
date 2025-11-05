@@ -1,6 +1,6 @@
 <launch>
-  <arg name="bind_ip"          default="127.0.0.1"/> <!-- pilho's IP: 172.22.118.107 -->
-  <arg name="dst_ip"           default="127.0.0.1"/> <!-- pilho's IP: 172.22.112.1 -->
+  <arg name="bind_ip"          default="172.22.118.107"/> <!-- pilho's IP: 172.22.118.107 -->
+  <arg name="dst_ip"           default="172.22.112.1"/> <!-- pilho's IP: 172.22.112.1 -->
   <arg name="ctrl_port"        default="9123"/>
   <arg name="collision_port"   default="9122"/>
   <arg name="status_port"      default="9121"/>

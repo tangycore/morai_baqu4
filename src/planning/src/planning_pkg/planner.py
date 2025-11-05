@@ -263,60 +263,37 @@ def frenet_paths_to_world(frenet_paths, center_line_xlist, center_line_ylist, ce
         if num_points == 0:
             continue
 
-        fp.yawlist = []
-        fp.ds = [0.0]
-        cumulative_s = [0.0]
-        last_heading = center_headings[-1] if center_headings else 0.0
-
-        if num_points == 1:
-            fp.yawlist.append(last_heading)
-            fp.kappa = np.zeros(1, dtype=float)
-            continue
-
-        total_s = 0.0
-        for i in range(num_points - 1):
+        for i in range(len(fp.xlist) - 1):
             dx = fp.xlist[i + 1] - fp.xlist[i]
             dy = fp.ylist[i + 1] - fp.ylist[i]
-            raw_step = np.hypot(dx, dy)
-            step_for_curvature = max(raw_step, 1e-4)
+            fp.yawlist.append(np.arctan2(dy, dx))
+            fp.ds.append(np.hypot(dx, dy))
 
-            if raw_step < 1e-4:
-                # fall back to the center-line heading when the step is nearly zero to avoid yaw spikes at stop
-                fallback_idx = min(i + 1, len(center_headings) - 1)
-                heading = center_headings[fallback_idx] if center_headings else last_heading
-            else:
-                heading = np.arctan2(dy, dx)
+        # 마지막 yaw는 끝 세그먼트와 동일하게 복제 (길이는 복제하지 않음)
+        if fp.yawlist:
+            fp.yawlist.append(fp.yawlist[-1])
 
-            fp.yawlist.append(heading)
-            fp.ds.append(raw_step)
+        # 누적 s (첫 점의 s=0)
+        s = np.zeros(len(fp.yawlist), dtype=float)
+        if fp.ds:
+            s[1:] = np.cumsum(fp.ds)
 
-            total_s += step_for_curvature
-            cumulative_s.append(total_s)
-            last_heading = heading
+        # 2) yaw 언랩 + s에 대한 미분 => 곡률
+        yaw_unwrapped = np.unwrap(np.asarray(fp.yawlist, dtype=float))
 
-        fp.yawlist.append(fp.yawlist[-1])
+        # 너무 작은 구간에서 수치폭주 방지: s가 단조 증가하도록 미세 보정
+        # (동일 s가 생기면 gradient가 터지므로, ε만큼 띄워줌)
+        eps = 1e-6
+        s_fix = np.maximum.accumulate(s + np.linspace(0, eps*len(s), len(s)))
 
-        s_axis = np.asarray(cumulative_s, dtype=float)
-        x_array = np.asarray(fp.xlist, dtype=float)
-        y_array = np.asarray(fp.ylist, dtype=float)
+        # 중앙차분 기반 dyaw/ds (곡률)
+        kappa = np.gradient(yaw_unwrapped, s_fix, edge_order=2)
 
-        if len(x_array) < 3 or s_axis[-1] < 1e-6:
-            fp.kappa = np.zeros(len(x_array), dtype=float)
-            continue
+        # 3) NaN/Inf 방지 + 물리적 클리핑(옵션)
+        kappa = np.where(np.isfinite(kappa), kappa, 0.0)
+        # kappa = np.clip(kappa, -3.0, 3.0)  # 필요시 범위 조절
 
-        dx_ds = np.gradient(x_array, s_axis, edge_order=2)
-        dy_ds = np.gradient(y_array, s_axis, edge_order=2)
-        d2x_ds2 = np.gradient(dx_ds, s_axis, edge_order=2)
-        d2y_ds2 = np.gradient(dy_ds, s_axis, edge_order=2)
-
-        denom = (dx_ds**2 + dy_ds**2)**1.5
-        fp.kappa = np.divide(
-            dx_ds * d2y_ds2 - dy_ds * d2x_ds2,
-            denom,
-            out=np.zeros_like(dx_ds),
-            where=denom > 1e-6
-        )
-
+        fp.kappa = kappa.tolist()
 
     return frenet_paths
 
@@ -422,7 +399,7 @@ def check_valid_path(paths, obs):
             continue
         elif any([abs(kappa) > K_MAX for kappa in path.kappa]):
             ck += 1
-            # rospy.logwarn(f"max kappa : {max(path.kappa)}")
+            # rospy.logwarn(f"max kappa : {max(abs(path.kappa))}")
             continue
         elif not is_forward_motion(path):
             cb += 1
