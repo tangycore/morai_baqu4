@@ -39,10 +39,10 @@ cd scripts && python3 ego_control_pub.py
 ---
 
 ### Perception
- - [바로가기](./src/perception)
- - 
+- [바로가기](./src/perception)
+  
 ### Planning
- - [바로가기](./src/planning)
+- [바로가기](./src/planning)
   
 ### Control
 - [바로가기](./src/control)
