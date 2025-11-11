@@ -36,44 +36,13 @@ roscd control
 cd scripts && python3 ego_control_pub.py
 ```
 
-6. 빠른 시작
-
-터미널 1
-```bash
-roslaunch rosbridge_server rosbridge_websocket.launch
-```
-
-터미널 2 ( 네트워크, 센서 연결 후 )
-```bash
-./run.sh
-```
-
-터미널 3 
-```bash
-roslaunch lidar_clustering lidar_clustering.launch
-```
-
-터미널 4
-```bash
-roscd planning_pkg
-cd scripts && python3 obstacle_debugger.py
-```
-
-터미널 5
-```bash
-roscd control
-cd scripts && python3 ego_control_pub.py
-```
-
-
-
-push after git sync
-
 ---
+
 ### Perception
  - [바로가기](./src/perception)
+ - 
 ### Planning
  - [바로가기](./src/planning)
+  
 ### Control
 - [바로가기](./src/control)
-- 
