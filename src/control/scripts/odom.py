@@ -23,7 +23,7 @@ class GPSIMUParser:
         # States
         self.x, self.y, self.psi = 0.0, 0.0, 0.0
         self.vx, self.delta = 0.0, 0.0
-        self.beta = 0.0  # ✅ sideslip angle (EgoVehicleStatus에서 받음)
+        self.beta = 0.0  
         
         # Vehicle parameters
         self.L = 2.5  # wheelbase
@@ -39,7 +39,7 @@ class GPSIMUParser:
         # Flags
         self.is_imu = False
         self.is_vx = False
-        self.is_beta = False  # ✅ sideslip 수신 여부
+        self.is_beta = False  # sideslip 수신 여부
         
         self.proj_UTM = Proj(proj='utm', zone=52, ellps='WGS84', preserve_units=False)
         
@@ -134,19 +134,8 @@ class GPSIMUParser:
         if np.isfinite(speed_kph):
             self.vx = speed_kph * (1000.0 / 3600.0)
             self.is_vx = True
-        
-        # 2. Sideslip angle (타이어 4개 평균 또는 후륜 평균)
-        # Option 1: 전체 평균
-        # beta_avg = (msg.side_slip_angle_fl + msg.side_slip_angle_fr + 
-        #             msg.side_slip_angle_rl + msg.side_slip_angle_rr) / 4.0
-        
-        # Option 2: 후륜 평균 (CG가 뒤쪽에 가까우므로)
+
         beta_avg = (msg.side_slip_angle_rl + msg.side_slip_angle_rr) / 2.0
-        
-        # Option 3: 가중 평균 (더 정확함)
-        # beta_front = (msg.side_slip_angle_fl + msg.side_slip_angle_fr) / 2.0
-        # beta_rear = (msg.side_slip_angle_rl + msg.side_slip_angle_rr) / 2.0
-        # beta_avg = (self.lr * beta_front + self.lf * beta_rear) / (self.lf + self.lr)
         
         if np.isfinite(beta_avg):
             self.beta = beta_avg
@@ -159,8 +148,6 @@ class GPSIMUParser:
     def dead_reckoning(self, dt):
         """
         GPS Blackout 전용: EgoVehicleStatus의 sideslip angle 직접 사용
-        
-        교수님 수식:
         - Ẋ = v·cos(ψ + β)
         - Ẏ = v·sin(ψ + β)
         - ψ̇ = (v·cos(β))/(ℓf + ℓr) · tan(δ)

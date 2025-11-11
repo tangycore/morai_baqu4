@@ -10,7 +10,7 @@
 - **Lost Track Management**: N 프레임 미검출 시 자동 삭제
 - **Velocity Estimation**: 위치 변화로 속도 계산
 
-###Tracking 
+### Tracking 
  **Tracker** (기본)
    - IOU 기반 매칭
    - 간단한 위치 차분으로 속도 계산
@@ -23,7 +23,7 @@
 
 ### 처리 단계
 1. **Ego Vehicle Filtering**: Bounding box 기반으로 자차 영역 제거
-2. **ROI Filtering**: 거리 및 관심 영역 필터링 (x, y, z, max_distance)
+2. **ROI Filtering**: 거리 및 관심 영역 ㅋ필터링 (x, y, z, max_distance)
 3. **DBSCAN Clustering**: KD-tree 기반 밀도기반 클러스터링
 4. **Bounding Box Generation**: 각 클러스터의 3D 박스 추정
 5. **Multi-Object Tracking**: IOU 매칭으로 stable ID 할당 및 속도 추정
