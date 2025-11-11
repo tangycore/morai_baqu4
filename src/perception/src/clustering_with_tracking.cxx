@@ -1,22 +1,19 @@
-/**
- * LiDAR Clustering Node with Object Tracking
- */
-
 #include "lidar_clustering/lidar_cluster_node.h"
-
-#include <std_msgs/Header.h>
-#include <visualization_msgs/Marker.h>
-#include <vision_msgs/Detection3D.h>
+#include <sstream>
+#include <iomanip>
+#include <cmath>
 #include <geometry_msgs/TransformStamped.h>
-
+#include <tf2_ros/transform_listener.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
+#include <vision_msgs/Detection3DArray.h>
 #include <pcl/common/common.h>
 #include <pcl/common/transforms.h>
+#include <pcl/point_cloud.h>            
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-
 #include <Eigen/Dense>
-
 #include "dbscan_kdtree/DBSCAN_kdtree.h"
 
 LidarClusterNode::LidarClusterNode() : pnh_("~")
